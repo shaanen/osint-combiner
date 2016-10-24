@@ -28,8 +28,7 @@ except socket.error as msg:
 
 try:
     for banner in api.search_cursor("asn:AS1101"):
-        msg = json.dumps(banner)
-        print('msg: ' + msg)
+        msg = json.dumps(banner).encode('utf-8')
         sock.send(msg)
 except shodan.APIError as e:
         print('Error: ', e)
