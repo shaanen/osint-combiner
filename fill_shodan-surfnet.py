@@ -1,5 +1,7 @@
 import shodan
 import configparser
+import simplejson
+import requests
 
 config = configparser.ConfigParser()
 config.read("keys.ini")
@@ -8,16 +10,12 @@ SHODAN_API_KEY = (config['SectionOne']['shodanapikey'])
 
 api = shodan.Shodan(SHODAN_API_KEY)
 
-# Wrap the request in a try/ except block to catch errors
 try:
-        # Search Shodan
-        results = api.search('asn:AS1103')
+    for banner in api.search_cursor("asn:AS1101"):#asn:AS1101
+        with open("shodan.txt", "a") as myfile:
+            myfile.write(simplejson.dumps(banner))
 
-        # Show the results
-        print ('Results found: %s' % results['total'])
-        for result in results['matches']:
-                print ('IP: %s' % result['ip_str'])
-                print (result['data'])
-                print ('')
+        #r = requests.post('http://145.100.181.87:9200/shodan-surfnet/', data=bannerinjson)
+        #print(r)
 except shodan.APIError as e:
         print('Error: ', e)
