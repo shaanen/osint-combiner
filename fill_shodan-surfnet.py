@@ -1,7 +1,11 @@
 import shodan
+import socket
 import configparser
+import sys
 import simplejson
-import requests
+
+HOST = 'localhost'
+PORT = 5040
 
 config = configparser.ConfigParser()
 config.read("keys.ini")
@@ -11,11 +15,24 @@ SHODAN_API_KEY = (config['SectionOne']['shodanapikey'])
 api = shodan.Shodan(SHODAN_API_KEY)
 
 try:
-    for banner in api.search_cursor("asn:AS1101"):#asn:AS1101
-        with open("shodan.txt", "a") as myfile:
-            myfile.write(simplejson.dumps(banner))
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+except socket.error as msg:
+    sys.stderr.write("[ERROR] %s\n" % msg[1])
+    sys.exit(1)
 
-        #r = requests.post('http://145.100.181.87:9200/shodan-surfnet/', data=bannerinjson)
-        #print(r)
+try:
+    sock.connect((HOST, PORT))
+except socket.error as msg:
+    sys.stderr.write("[ERROR] %s\n" % msg[1])
+    sys.exit(2)
+
+try:
+    for banner in api.search_cursor("asn:AS1101"):
+        msg = simplejson.dumps(banner)
+        sock.send(msg)
 except shodan.APIError as e:
         print('Error: ', e)
+
+
+sock.close()
+sys.exit(0)
