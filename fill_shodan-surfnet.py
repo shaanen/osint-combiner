@@ -2,7 +2,7 @@ import shodan
 import socket
 import configparser
 import sys
-import simplejson
+import json
 
 HOST = 'localhost'
 PORT = 5040
@@ -28,7 +28,7 @@ except socket.error as msg:
 
 try:
     for banner in api.search_cursor("asn:AS1101"):
-        msg = simplejson.dumps(banner)
+        msg = json.dumps(banner)
         sock.send(msg)
 except shodan.APIError as e:
         print('Error: ', e)
