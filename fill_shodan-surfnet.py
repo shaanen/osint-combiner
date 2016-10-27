@@ -8,7 +8,7 @@ HOST = 'localhost'
 PORT = 5040
 config = configparser.ConfigParser()
 config.read("keys.ini")
-SHODAN_API_KEY = (config['SectionOne']['shodanapikey'])
+SHODAN_API_KEY = (config['SectionOne']['SHODAN_API_KEY'])
 api = shodan.Shodan(SHODAN_API_KEY)
 
 items = {'1': 'blablablabla', '2': 'asn:AS1101'}
