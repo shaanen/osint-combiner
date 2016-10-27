@@ -1,25 +1,27 @@
-import sys
-import censys
+import censys.ipv4
 import configparser
-from censys import *
+import json
+import socket
+import sys
 
+HOST = 'localhost'
+PORT = 5040
 config = configparser.ConfigParser()
 config.read("keys.ini")
 CENSYS_API_ID = (config['SectionOne']['CENSYS_API_ID'])
 CENSYS_API_KEY = (config['SectionOne']['CENSYS_API_KEY'])
 
-api = censys.ipv4.CensysIPv4(api_id=CENSYS_API_ID, api_secret=CENSYS_API_KEY)
-
-res = api.search("145.99.0.0/16")
-
-matches = res['metadata']['count']
-pageNum = matches / 100
-if matches % 100 != 0:
-    pageNum += 1
-
-count = 1
-while count <= pageNum:
-    res = api.search("145.99.0.0/16", page=count)
-    count += 1
-    for i in res.get('results'):
-        print("{} {}".format(i.get("ip"), " ".join(i.get('protocols'))))
+censys = censys.ipv4.CensysIPv4(api_id=CENSYS_API_ID, api_secret=CENSYS_API_KEY)
+for record in censys.search("145.220.0.0/16"):
+    msg = json.dumps(record).encode('utf-8')
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    except socket.error as msg:
+        sys.stderr.write("[ERROR] %s\n" % msg[1])
+        sys.exit(1)
+    try:
+        sock.connect((HOST, PORT))
+    except socket.error as msg:
+        sys.stderr.write("[ERROR] %s\n" % msg[1])
+        sys.exit(2)
+    sock.send(msg)
