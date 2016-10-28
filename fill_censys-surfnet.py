@@ -21,7 +21,8 @@ for record in censys.search("145.220.0.0/16"):
         sys.exit(1)
     try:
         sock.connect((HOST, PORT))
+        print("Sending data: " + json.dumps(record))
+        sock.send(msg)
     except socket.error as msg:
         sys.stderr.write("[ERROR] %s\n" % msg[1])
         sys.exit(2)
-    sock.send(msg)
