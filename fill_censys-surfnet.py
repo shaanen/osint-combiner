@@ -5,7 +5,7 @@ import socket
 import sys
 
 HOST = 'localhost'
-PORT = 5040
+PORT = 5041
 config = configparser.ConfigParser()
 config.read("keys.ini")
 CENSYS_API_ID = (config['SectionOne']['CENSYS_API_ID'])
