@@ -12,7 +12,7 @@ CENSYS_API_ID = (config['SectionOne']['CENSYS_API_ID'])
 CENSYS_API_KEY = (config['SectionOne']['CENSYS_API_KEY'])
 
 censys = censys.ipv4.CensysIPv4(api_id=CENSYS_API_ID, api_secret=CENSYS_API_KEY)
-for record in censys.search("145.220.0.0/16"):
+for record in censys.search("autonomous_system.asn: 1101"):
     msg = json.dumps(record).encode('utf-8')
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
