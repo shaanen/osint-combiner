@@ -18,7 +18,7 @@ chosenQuery = items[choice]
 if chosenQuery is items['3']:
     chosenQuery = input("Enter Query: ")
 try:
-    with open("outputfile.txt", "a") as outputfile:
+    with open("outputfile.json", "a") as outputfile:
         for banner in api.search_cursor(chosenQuery):
             outputfile.write(json.dumps(banner) + "\n")
 except shodan.APIError as e:
