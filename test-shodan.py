@@ -1,12 +1,7 @@
 import shodan
 import configparser
-import sys
 import json
 
-# For testing if Shodan API still works with given key
-
-HOST = 'localhost'
-PORT = 5040
 config = configparser.ConfigParser()
 config.read("keys.ini")
 SHODAN_API_KEY = (config['SectionOne']['SHODAN_API_KEY'])
@@ -21,11 +16,9 @@ if chosenQuery is items['3']:
     chosenQuery = input("Enter Query: ")
 
 try:
-    print("going in for loop")
+    print("going through api.search_cursor...")
     for banner in api.search_cursor(chosenQuery):
-        msg = json.dumps(banner).encode('utf-8')
-        print("banner: " + json.dumps(banner))
-    print("end for loop")
+        print(json.dumps(banner))
+    print("end api.search_cursor")
 except shodan.APIError as e:
         print('Error: ', e)
-sys.exit(0)

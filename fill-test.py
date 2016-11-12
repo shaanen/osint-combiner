@@ -20,14 +20,14 @@ for record in censys.search(query):
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     except socket.error as msg:
-        sys.stderr.write("[ERROR] %s\n" % msg[1])
+        sys.stderr.write("[ERROR] %s\n" % msg)
         sys.exit(1)
     try:
         sock.connect((HOST, PORT))
         print("Sending data: " + json.dumps(record))
         sock.send(msg)
     except socket.error as msg:
-        sys.stderr.write("[ERROR] %s\n" % msg[1])
+        sys.stderr.write("[ERROR] %s\n" % msg)
         sys.exit(2)
 
 api = shodan.Shodan(SHODAN_API_KEY)
@@ -37,15 +37,14 @@ try:
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         except socket.error as msg:
-            sys.stderr.write("[ERROR] %s\n" % msg[1])
+            sys.stderr.write("[ERROR] %s\n" % msg)
             sys.exit(1)
         try:
             sock.connect((HOST, PORT))
         except socket.error as msg:
-            sys.stderr.write("[ERROR] %s\n" % msg[1])
+            sys.stderr.write("[ERROR] %s\n" % msg)
             sys.exit(2)
         sock.send(msg)
         sock.close()
 except shodan.APIError as e:
         print('Error: ', e)
-sys.exit(0)
