@@ -10,6 +10,8 @@ config = configparser.ConfigParser()
 config.read("keys.ini")
 SHODAN_API_KEY = (config['SectionOne']['SHODAN_API_KEY'])
 api = shodan.Shodan(SHODAN_API_KEY)
+nrOfResults = 0
+nrOfResultsSent = 0
 
 items = {'1': 'blablablabla', '2': 'asn:AS1101', '3': 'custom query'}
 choice = '0'
@@ -20,6 +22,7 @@ if chosenQuery is items['3']:
     chosenQuery = input("Enter Query: ")
 try:
     for banner in api.search_cursor(chosenQuery):
+        nrOfResults += 1
         msg = json.dumps(banner).encode('utf-8')
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -32,6 +35,8 @@ try:
             print(msg)
             sys.exit(2)
         sock.send(msg)
+        nrOfResultsSent += 1
 except shodan.APIError as e:
         print('Error: ', e)
-sys.exit(0)
+print("Results received:", nrOfResults)
+print("Results sent: {}", nrOfResultsSent)

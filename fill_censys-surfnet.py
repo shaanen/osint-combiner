@@ -10,6 +10,8 @@ config = configparser.ConfigParser()
 config.read("keys.ini")
 CENSYS_API_ID = (config['SectionOne']['CENSYS_API_ID'])
 CENSYS_API_KEY = (config['SectionOne']['CENSYS_API_KEY'])
+nrOfResults = 0
+nrOfResultsSent = 0
 
 items = {'2': 'autonomous_system.asn: 1101', '3': 'custom query'}
 choice = '0'
@@ -21,6 +23,7 @@ if chosenQuery is items['3']:
 
 censys = censys.ipv4.CensysIPv4(api_id=CENSYS_API_ID, api_secret=CENSYS_API_KEY)
 for record in censys.search(chosenQuery):
+    nrOfResults += 1
     msg = json.dumps(record).encode('utf-8')
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -29,8 +32,10 @@ for record in censys.search(chosenQuery):
         sys.exit(1)
     try:
         sock.connect((HOST, PORT))
-        print("Sending data: " + json.dumps(record))
         sock.send(msg)
+        nrOfResultsSent += 1
     except socket.error as msg:
         sys.stderr.write("[ERROR] %s\n" % msg[1])
         sys.exit(2)
+print("Results received:", nrOfResults)
+print("Results sent: {}", nrOfResultsSent)

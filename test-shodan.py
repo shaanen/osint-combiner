@@ -6,6 +6,7 @@ config = configparser.ConfigParser()
 config.read("keys.ini")
 SHODAN_API_KEY = (config['SectionOne']['SHODAN_API_KEY'])
 api = shodan.Shodan(SHODAN_API_KEY)
+nrOfResults = 0
 
 items = {'1': 'blablablabla', '2': 'asn:AS1101', '3': 'custom query'}
 choice = '0'
@@ -18,7 +19,9 @@ if chosenQuery is items['3']:
 try:
     print("going through api.search_cursor...")
     for banner in api.search_cursor(chosenQuery):
+        nrOfResults += 1
         print(json.dumps(banner))
     print("end api.search_cursor")
 except shodan.APIError as e:
         print('Error: ', e)
+print("Results received:", nrOfResults)
