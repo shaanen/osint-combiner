@@ -7,6 +7,8 @@ Project needs a file named "keys.ini" with API keys with the following syntax:
 
 [SectionOne]
 
-shodanapikey: *{Shodan API key here}* 
+shodanapikey: *{Shodan API key here}*
+
 CENSYS_API_ID: *{Censys API ID here}* 
+
 CENSYS_API_KEY: *{Censys Secret here}* 
