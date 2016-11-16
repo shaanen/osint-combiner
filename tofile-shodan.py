@@ -23,6 +23,6 @@ try:
         for banner in api.search_cursor(chosenQuery):
             nrOfResults += 1
             outputfile.write(json.dumps(banner) + "\n")
+            print('\r ' + str(nrOfResults) + " results written in" + path_outputfile, end='')
 except shodan.APIError as e:
         print('Error: ', e)
-print(nrOfResults, "results written in", path_outputfile)
