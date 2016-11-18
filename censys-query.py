@@ -1,5 +1,6 @@
 import censys.query
 import configparser
+from base_censys import get_latest_ipv4
 
 config = configparser.ConfigParser()
 config.read("keys.ini")
@@ -9,14 +10,8 @@ nrOfResults = 0
 
 c = censys.query.CensysQuery(api_id=CENSYS_API_ID, api_secret=CENSYS_API_KEY)
 
-# find datasets (e.g., ipv4) that have exposed data
-print(c.get_series())
-
-# get schema and tables for a given dataset
-print(c.get_series_details("ipv4"))
-
 # Start SQL job
-res = c.new_job("select count(*) from certificates.certificates")
+res = c.new_job("select COUNT(*) from ipv4." + get_latest_ipv4())
 job_id = res["job_id"]
 
 # Wait for job to finish and get job metadata

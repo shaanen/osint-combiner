@@ -1,4 +1,4 @@
-import censys.ipv4
+import base_censys.ipv4
 import configparser
 import json
 import socket
@@ -21,7 +21,7 @@ chosenQuery = items[choice]
 if chosenQuery is items['3']:
     chosenQuery = input("Enter Query: ")
 
-censys = censys.ipv4.CensysIPv4(api_id=CENSYS_API_ID, api_secret=CENSYS_API_KEY)
+base_censys = base_censys.ipv4.CensysIPv4(api_id=CENSYS_API_ID, api_secret=CENSYS_API_KEY)
 for record in censys.search(chosenQuery):
     nrOfResults += 1
     msg = json.dumps(record).encode('utf-8')

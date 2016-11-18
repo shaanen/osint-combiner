@@ -1,4 +1,4 @@
-import censys.ipv4
+import base_censys.ipv4
 import configparser
 import json
 import socket
@@ -14,7 +14,7 @@ CENSYS_API_KEY = (config['SectionOne']['CENSYS_API_KEY'])
 SHODAN_API_KEY = (config['SectionOne']['SHODAN_API_KEY'])
 query = "blablablabla"
 
-censys = censys.ipv4.CensysIPv4(api_id=CENSYS_API_ID, api_secret=CENSYS_API_KEY)
+base_censys = base_censys.ipv4.CensysIPv4(api_id=CENSYS_API_ID, api_secret=CENSYS_API_KEY)
 for record in censys.search(query):
     msg = json.dumps(record).encode('utf-8')
     try:
