@@ -1,6 +1,6 @@
 import censys.query
 import configparser
-from base_censys import get_latest_ipv4
+from base import get_latest_ipv4
 
 config = configparser.ConfigParser()
 config.read("keys.ini")

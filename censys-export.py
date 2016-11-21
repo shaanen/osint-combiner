@@ -2,7 +2,6 @@ import censys.export
 import configparser
 import urllib.request
 import shutil
-import sys
 
 config = configparser.ConfigParser()
 config.read("keys.ini")

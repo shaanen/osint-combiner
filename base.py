@@ -18,3 +18,14 @@ def get_latest_ipv4():
             numbers.append(splitted_number)
     return max(numbers)
 
+
+def get_shodan_userinput():
+    items = {'1': 'blablablabla', '2': 'asn:AS1101', '3': 'custom query'}
+    choice = '0'
+    while choice not in items:
+        choice = input("Choose query: (1='blablablabla' 2='asn:AS1101' 3='custom query')")
+    chosen_query = items[choice]
+    if chosen_query is items['3']:
+        chosen_query = input("Enter Query: ")
+    return chosen_query
+

@@ -3,6 +3,7 @@ import socket
 import configparser
 import sys
 import json
+from base import get_shodan_userinput
 
 HOST = 'localhost'
 PORT = 5040
@@ -13,15 +14,9 @@ api = shodan.Shodan(SHODAN_API_KEY)
 nrOfResults = 0
 nrOfResultsSent = 0
 
-items = {'1': 'blablablabla', '2': 'asn:AS1101', '3': 'custom query'}
-choice = '0'
-while choice not in items:
-    choice = input("Choose query: (1='blablablabla' 2='asn:AS1101' 3='custom query')")
-chosenQuery = items[choice]
-if chosenQuery is items['3']:
-    chosenQuery = input("Enter Query: ")
+chosen_query = get_shodan_userinput()
 try:
-    for banner in api.search_cursor(chosenQuery):
+    for banner in api.search_cursor(chosen_query):
         nrOfResults += 1
         msg = json.dumps(banner).encode('utf-8')
         try:
