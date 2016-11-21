@@ -1,7 +1,7 @@
 import shodan
 import configparser
 import json
-from base import get_shodan_userinput
+from base import shodan_get_user_input
 
 config = configparser.ConfigParser()
 config.read("keys.ini")
@@ -9,7 +9,7 @@ SHODAN_API_KEY = (config['SectionOne']['SHODAN_API_KEY'])
 api = shodan.Shodan(SHODAN_API_KEY)
 nrOfResults = 0
 
-chosen_query = get_shodan_userinput()
+chosen_query = shodan_get_user_input()
 
 try:
     print("going through api.search_cursor...")

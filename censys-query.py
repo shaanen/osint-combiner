@@ -1,6 +1,6 @@
 import censys.query
 import configparser
-from base import get_latest_ipv4
+from base import censys_get_latest_ipv4_tables
 
 config = configparser.ConfigParser()
 config.read("keys.ini")
@@ -11,7 +11,7 @@ nrOfResults = 0
 c = censys.query.CensysQuery(api_id=CENSYS_API_ID, api_secret=CENSYS_API_KEY)
 
 # Start SQL job
-res = c.new_job("select COUNT(*) from ipv4." + get_latest_ipv4())
+res = c.new_job("select COUNT(*) from ipv4." + censys_get_latest_ipv4_tables())
 job_id = res["job_id"]
 
 # Wait for job to finish and get job metadata

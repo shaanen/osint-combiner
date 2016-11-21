@@ -1,26 +1,34 @@
-import base.ipv4
+import censys.export
 import configparser
-import json
+import urllib.request
+import shutil
+from base import censys_get_user_input_asn
+from base import censys_get_latest_ipv4_tables
 
 config = configparser.ConfigParser()
 config.read("keys.ini")
 CENSYS_API_ID = (config['SectionOne']['CENSYS_API_ID'])
 CENSYS_API_KEY = (config['SectionOne']['CENSYS_API_KEY'])
-path_outputfile = "outputfile-censys.json"
 nrOfResults = 0
+path_output_file = 'outputfiles/censys/censys.json'
 
-items = {'2': 'autonomous_system.asn: 1101', '3': 'custom query'}
-choice = '0'
-while choice not in items:
-    choice = input("Choose query: (2='autonomous_system.asn: 1101' 3='custom query')")
-chosenQuery = items[choice]
-if chosenQuery is items['3']:
-    chosenQuery = input("Enter Query: ")
+asn = censys_get_user_input_asn()
 
-base_censys = base.ipv4.CensysIPv4(api_id=CENSYS_API_ID, api_secret=CENSYS_API_KEY)
+c = censys.export.CensysExport(api_id=CENSYS_API_ID, api_secret=CENSYS_API_KEY)
+latest_table = censys_get_latest_ipv4_tables()
+query = "select * from ipv4." + str(latest_table) + " where autonomous_system.asn = " + str(asn)
+print("Executing query: " + query)
+# Start new Job
+res = c.new_job(query)
+job_id = res["job_id"]
 
-with open(path_outputfile, "a") as outputfile:
-    for record in censys.search(chosenQuery):
-        nrOfResults += 1
-        outputfile.write(json.dumps(record) + "\n")
-        print('\r ' + str(nrOfResults) + " results written in" + path_outputfile, end='')
+result = c.check_job_loop(job_id)
+
+if result['status'] == 'success':
+    for path in result['download_paths']:
+        with urllib.request.urlopen(path) as response, open(path_output_file, 'ab') as out_file:
+            shutil.copyfileobj(response, out_file)
+            print('Got file from URL: ' + response.geturl())
+            print("Appended results to", path_output_file)
+else:
+    print('Censys job failed.' + '\n' + str(result))

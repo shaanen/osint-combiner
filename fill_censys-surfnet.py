@@ -3,6 +3,7 @@ import configparser
 import json
 import socket
 import sys
+from base import censys_get_user_input
 
 HOST = 'localhost'
 PORT = 5041
@@ -13,16 +14,10 @@ CENSYS_API_KEY = (config['SectionOne']['CENSYS_API_KEY'])
 nrOfResults = 0
 nrOfResultsSent = 0
 
-items = {'2': 'autonomous_system.asn: 1101', '3': 'custom query'}
-choice = '0'
-while choice not in items:
-    choice = input("Choose query: (2='autonomous_system.asn: 1101' 3='custom query')")
-chosenQuery = items[choice]
-if chosenQuery is items['3']:
-    chosenQuery = input("Enter Query: ")
+chosen_query = censys_get_user_input()
 
-base = censys.ipv4.CensysIPv4(api_id=CENSYS_API_ID, api_secret=CENSYS_API_KEY)
-for record in censys.search(chosenQuery):
+c = censys.ipv4.CensysIPv4(api_id=CENSYS_API_ID, api_secret=CENSYS_API_KEY)
+for record in c.search(chosen_query):
     nrOfResults += 1
     msg = json.dumps(record).encode('utf-8')
     try:
