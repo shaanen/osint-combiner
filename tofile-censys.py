@@ -25,6 +25,7 @@ job_id = res["job_id"]
 result = c.check_job_loop(job_id)
 
 if result['status'] == 'success':
+    print(result)
     for path in result['download_paths']:
         with urllib.request.urlopen(path) as response, open(path_output_file, 'ab') as out_file:
             shutil.copyfileobj(response, out_file)
