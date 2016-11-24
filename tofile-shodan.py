@@ -3,8 +3,6 @@ import configparser
 import json
 from base import shodan_get_user_input
 
-HOST = 'localhost'
-PORT = 5040
 config = configparser.ConfigParser()
 config.read("keys.ini")
 SHODAN_API_KEY = (config['SectionOne']['SHODAN_API_KEY'])
