@@ -11,7 +11,7 @@ nrOfResults = 0
 c = censys.query.CensysQuery(api_id=CENSYS_API_ID, api_secret=CENSYS_API_KEY)
 
 # Start SQL job
-res = c.new_job("select COUNT(*) from ipv4." + censys_get_latest_ipv4_tables())
+res = c.new_job("select * from ipv4." + censys_get_latest_ipv4_tables() + " where autonomous_system.asn = 1104")
 job_id = res["job_id"]
 
 # Wait for job to finish and get job metadata
