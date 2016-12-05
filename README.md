@@ -12,3 +12,8 @@ shodanapikey: *{Shodan API key here}*
 CENSYS_API_ID: *{Censys API ID here}* 
 
 CENSYS_API_KEY: *{Censys Secret here}* 
+
+ZOOMEYE_USERNAME: *{Zoomeye e-mail here}*
+
+ZOOMEYE_PASSWORD: *{Zoomeye password here}*
+
