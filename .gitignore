@@ -42,4 +42,5 @@ fabric.properties
 
 # keys.ini containing API keys
 keys.ini
-temp.py
+# Script to experiment with code snippets
+experimental.py

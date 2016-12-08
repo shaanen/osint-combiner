@@ -1,4 +1,4 @@
-# Reads CIDRs from file, uses ipinfo for each IP, saves output to outputfiles/ipinfo/ipinfo.json
+#!/usr/bin/python3
 
 from netaddr import IPNetwork
 import threading
