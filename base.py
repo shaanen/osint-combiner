@@ -53,4 +53,4 @@ def censys_get_user_input():
         chosen_query = input("Enter Query: ")
     return chosen_query
 
-def zoomeye_get_access_token(username, password):
+#def zoomeye_get_access_token(username, password):
