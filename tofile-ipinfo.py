@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Reads CIDRs from file, uses ipinfo for each IP, saves output to outputfiles/ipinfo/ipinfo.json
 
 from netaddr import IPNetwork
