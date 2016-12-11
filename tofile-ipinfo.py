@@ -4,11 +4,13 @@ from netaddr import IPNetwork
 import threading
 import requests
 import logging
-import time
+import json
+from datetime import datetime
 
 url = 'http://ipinfo.dutchsec.nl/submit'
 headers = {'Content-Type': 'text/plain', 'Accept': 'text/json'}
 path_output_file = 'outputfiles/ipinfo/ipinfo.json'
+cidr = '192.104.140.0/27'
 result_list = []
 threads = []
 
@@ -20,34 +22,37 @@ class GetIpInfoThread (threading.Thread):
         self.target_ip = target_ip
 
     def run(self):
-        print('Getting request for ip: %s' % self.target_ip + '...')
-        try:
-            resp = requests.post(url, headers=headers, data=str(self.target_ip))
-        except requests.exceptions.ConnectionError:
-            logging.warning("ConnectionError for ip %s" % self.target_ip)
-            return
-        result_list.append(resp.text)
+        # print('Getting ip: %s' % self.target_ip + '...')
+        got_valid_response = False
+        while not got_valid_response:
+            try:
+                resp = requests.post(url, headers=headers, data=str(self.target_ip))
+                resp_json = json.loads(resp.text)
+                resp_json['timestamp'] = str(datetime.now())
+                result_list.append(json.dumps(resp_json))
+                got_valid_response = True
+            except requests.exceptions.ConnectionError:
+                logging.warning("ConnectionError for ip %s" % self.target_ip + " retrying now...")
+            # print('Done ip: %s' % self.target_ip)
 
+
+
+IPs = IPNetwork(cidr)
+print('---Getting info for CIDR ' + cidr + ' (' + str(IPs.size) + ' total)---')
 # Start GetIpInfoThread per ip
-nr_of_ips = 0
-for ip in IPNetwork('192.104.140.0/24'):
-    if nr_of_ips == 50:
-        break
-    if nr_of_ips % 5 == 0:
-        time.sleep(6)
+for ip in IPs:
     thread = GetIpInfoThread(ip)
     thread.start()
     threads.append(thread)
-    nr_of_ips += 1
 
 # Wait for all GetIpInfoThreads to complete
 for thread in threads:
     thread.join()
+print(str(IPs.size) + ' IPs in CIDR ' + cidr)
 
 # Write all responses to file
-nr_of_results = 0
 with open(path_output_file, "a") as output_file:
-    for item in result_list:
-        nr_of_results += 1
-        output_file.write(item)
-        print('\r ' + str(nr_of_results) + " results written in" + path_output_file, end='')
+    output_file.write('\n'.join(result_list))
+
+print('\r' + str(len(result_list)) + " results written in" + path_output_file, end='')
+
