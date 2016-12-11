@@ -4,6 +4,7 @@ from netaddr import IPNetwork
 import threading
 import requests
 import logging
+import time
 
 url = 'http://ipinfo.dutchsec.nl/submit'
 headers = {'Content-Type': 'text/plain', 'Accept': 'text/json'}
@@ -28,10 +29,16 @@ class GetIpInfoThread (threading.Thread):
         result_list.append(resp.text)
 
 # Start GetIpInfoThread per ip
-for ip in IPNetwork('192.16.185.0/24'):
+nr_of_ips = 0
+for ip in IPNetwork('192.104.140.0/24'):
+    if nr_of_ips == 50:
+        break
+    if nr_of_ips % 5 == 0:
+        time.sleep(6)
     thread = GetIpInfoThread(ip)
     thread.start()
     threads.append(thread)
+    nr_of_ips += 1
 
 # Wait for all GetIpInfoThreads to complete
 for thread in threads:

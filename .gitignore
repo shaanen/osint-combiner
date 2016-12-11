@@ -44,3 +44,9 @@ fabric.properties
 keys.ini
 # Script to experiment with code snippets
 experimental.py
+
+*.pyc 
+__pycache__/
+
+
+
