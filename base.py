@@ -1,5 +1,6 @@
 import censys.query
 import configparser
+from netaddr import IPNetwork
 
 config = configparser.ConfigParser()
 config.read("keys.ini")
@@ -52,5 +53,15 @@ def censys_get_user_input():
     if chosen_query is items['3']:
         chosen_query = input("Enter Query: ")
     return chosen_query
+
+
+def get_cidr_from_user_input():
+    ip_or_cidr = '0'
+    while not isinstance(ip_or_cidr, IPNetwork):
+        try:
+            ip_or_cidr = IPNetwork(input("IP/CIDR: "))
+        except:
+            print('Not a valid IP/CIDR.')
+    return ip_or_cidr
 
 #def zoomeye_get_access_token(username, password):
