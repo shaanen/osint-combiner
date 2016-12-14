@@ -3,7 +3,7 @@ import socket
 import configparser
 import sys
 import json
-from base import shodan_get_user_input
+from base import shodan_get_user_input_queries
 
 HOST = 'localhost'
 PORT = 5040
@@ -14,7 +14,7 @@ api = shodan.Shodan(SHODAN_API_KEY)
 nrOfResults = 0
 nrOfResultsSent = 0
 
-chosen_query = shodan_get_user_input()
+chosen_query = shodan_get_user_input_queries()
 try:
     for banner in api.search_cursor(chosen_query):
         nrOfResults += 1

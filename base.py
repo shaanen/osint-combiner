@@ -1,11 +1,16 @@
 import censys.query
 import configparser
 from netaddr import IPNetwork
+import re
+import shodan
+import json
+import string
 
 config = configparser.ConfigParser()
 config.read("keys.ini")
 CENSYS_API_ID = (config['SectionOne']['CENSYS_API_ID'])
 CENSYS_API_KEY = (config['SectionOne']['CENSYS_API_KEY'])
+SHODAN_API_KEY = (config['SectionOne']['SHODAN_API_KEY'])
 nrOfResults = 0
 
 
@@ -20,15 +25,24 @@ def censys_get_latest_ipv4_tables():
     return max(numbers)
 
 
-def shodan_get_user_input():
-    items = {'1': 'blablablabla', '2': 'asn:AS1101', '3': 'custom query'}
-    choice = '0'
-    while choice not in items:
-        choice = input("Choose query: (1='blablablabla' 2='asn:AS1101' 3='custom query')")
-    chosen_query = items[choice]
-    if chosen_query is items['3']:
-        chosen_query = input("Enter Query: ")
-    return chosen_query
+# Returns a non empty set of strings
+def shodan_get_user_input_queries():
+    queries = set()
+    done = False
+    while not done:
+        items = {'1': 'blablablabla', '2': 'asn:AS1101', '3': 'custom query', '4': 'done'}
+        choice = '0'
+        while choice not in items:
+            choice = input("Choose query: (1='blablablabla' 2='asn:AS1101' 3='custom query'). 4=done")
+        chosen_query = items[choice]
+        if chosen_query is items['3']:
+            chosen_query = input("Enter Query: ")
+        elif chosen_query is items['4']:
+            if queries != set():
+                done = True
+        if chosen_query is not items['4']:
+            queries.add(chosen_query)
+    return queries
 
 
 def censys_get_user_input_asn():
@@ -64,4 +78,42 @@ def get_cidr_from_user_input():
             print('Not a valid IP/CIDR.')
     return ip_or_cidr
 
-#def zoomeye_get_access_token(username, password):
+
+def parse_all_cidrs_from_file(file_path):
+    with open(file_path) as f:
+        l = re.findall('(?:\d{1,3}\.){3}\d{1,3}(?:/\d\d?)?', f.read())
+    return l
+
+
+def to_file_shodan(queries, path_output_file):
+    api = shodan.Shodan(SHODAN_API_KEY)
+    nr_total_results = 0
+    failed_queries = set()
+    for query in queries:
+        results = []
+        try:
+            for banner in api.search_cursor(query):
+                results.append(json.dumps(banner) + '\n')
+                print('\r' + str(len(results)) + ' results fetched...', end='')
+        except shodan.APIError as e:
+            print('Error: ', e)
+            failed_queries.add(failed_queries)
+        with open(path_output_file, "a") as output_file:
+            for banner in results:
+                output_file.write(banner)
+        print('\r' + str(len(results)) + ' results written from query(' + query + ')')
+        nr_total_results += len(results)
+    # Print failed queries if present
+    if not failed_queries == set():
+        print('Failed queries: ', failed_queries)
+    print(str(nr_total_results) + ' total results written in ' + path_output_file)
+
+
+# valid file names may only contain: ascii_lowercase, digits, dot, dash, underscore
+def is_valid_file_name(str_input):
+    allowed = set(string.ascii_lowercase + string.digits + '.-_')
+    if str_input is not '':
+        return set(str_input) <= allowed
+    return False
+
+# def zoomeye_get_access_token(username, password):
