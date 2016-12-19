@@ -24,10 +24,8 @@ def es_get_distinct_ips(index):
     count = res_count['count']
     res = es.search(index=index,
                     body={"size": 0, "aggs": {"distinct_ip": {"terms": {"field": "ip", "size": count}}}})
-    print('fill results')
     for hit in res['aggregations']['distinct_ip']['buckets']:
         results.add(hit["key"])
-    print('filled results')
     return results
 
 
