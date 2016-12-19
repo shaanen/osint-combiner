@@ -25,7 +25,7 @@ def es_get_distinct_ips(index):
     res = es.search(index=index,
                     body={"size": 0, "aggs": {"distinct_ip": {"terms": {"field": "ip", "size": count}}}})
     for hit in res['aggregations']['distinct_ip']['buckets']:
-        results.add(hit)
+        results.add(hit["key"])
 
 
 def censys_get_latest_ipv4_tables():
