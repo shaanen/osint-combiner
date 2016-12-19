@@ -40,8 +40,9 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
-# keys.ini containing API keys
-keys.ini
+# config.ini containing configuration for scripts
+config.ini
+
 # Temporary local scripts
 temp.py
 
