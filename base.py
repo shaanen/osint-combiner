@@ -80,8 +80,11 @@ def get_cidr_from_user_input():
 
 
 def parse_all_cidrs_from_file(file_path):
-    with open(file_path) as f:
-        l = re.findall('(?:\d{1,3}\.){3}\d{1,3}(?:/\d\d?)?', f.read())
+    l = []
+    while not l:
+        with open(file_path) as f:
+            l = re.findall('(?:\d{1,3}\.){3}\d{1,3}(?:/\d\d?)?', f.read())
+            print('CIDRs in file: ' + str(len(l)))
     return l
 
 
