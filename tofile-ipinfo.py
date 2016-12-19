@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # Reads CIDRs from user input, uses ipinfo for each IP, saves output to outputfiles/ipinfo/ipinfo.json
 from netaddr import IPSet
+from netaddr import IPNetwork
 import threading
 import requests
 import json
@@ -137,7 +138,7 @@ elif choice is '2':
     for cidr in cidrs:
         print('--Starting with CIDR: ' + cidr + ' (' + (str(cidrs.index(cidr) + 1 )) + '/' + str(len(cidrs)) + ')--')
 
-        cidr_to_ipinfo(IPSet(cidr))
+        cidr_to_ipinfo(IPNetwork(cidr))
 elif choice is '3':
     IPs = es_get_distinct_ips('as1103-new')
     cidr_to_ipinfo(IPs)
