@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Reads CIDRs from user input, uses ipinfo for each IP, saves output to outputfiles/ipinfo/ipinfo.json
-from netaddr import IPNetwork
+from netaddr import IPSet
 import threading
 import requests
 import json
@@ -10,6 +10,7 @@ import os
 import queue
 from base import get_cidr_from_user_input
 from base import parse_all_cidrs_from_file
+from base import es_get_distinct_ips
 
 url = 'https://ipinfo.dutchsec.nl/submit'
 headers = {'Content-Type': 'text/plain', 'Accept': 'text/json'}
@@ -69,6 +70,7 @@ class GetIpInfoThread (threading.Thread):
                 queueLock.release()
             time.sleep(1)
 
+
 def cidr_to_ipinfo(IPs):
     global exitFlag
     nr_threads = 0
@@ -116,10 +118,10 @@ def cidr_to_ipinfo(IPs):
 
 
 def get_choice():
-    items = {'1': 'console_input', '2': 'cidr_file_input'}
+    items = {'1': 'console_input', '2': 'cidr_file_input', '3': 'elasticsearch_input'}
     nr = '0'
     while nr not in items:
-        nr = input("Console input[1] or CIDR file input[2]?")
+        nr = input("Console input[1], CIDR file input[2] or Elasticsearch input[3]?")
     return nr
 
 choice = get_choice()
@@ -134,4 +136,8 @@ elif choice is '2':
     print(cidrs, sep='\n')
     for cidr in cidrs:
         print('--Starting with CIDR: ' + cidr + ' (' + (str(cidrs.index(cidr) + 1 )) + '/' + str(len(cidrs)) + ')--')
-        cidr_to_ipinfo(IPNetwork(cidr))
+
+        cidr_to_ipinfo(IPSet(cidr))
+elif choice is '3':
+    IPs = es_get_distinct_ips('as1103-new')
+    cidr_to_ipinfo(IPs)

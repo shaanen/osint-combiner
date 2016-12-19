@@ -1,6 +1,8 @@
+from elasticsearch import Elasticsearch
 import censys.query
 import configparser
 from netaddr import IPNetwork
+from netaddr import IPSet
 import re
 import shodan
 import json
@@ -11,7 +13,19 @@ config.read("config.ini")
 CENSYS_API_ID = (config['SectionOne']['CENSYS_API_ID'])
 CENSYS_API_KEY = (config['SectionOne']['CENSYS_API_KEY'])
 SHODAN_API_KEY = (config['SectionOne']['SHODAN_API_KEY'])
+ES_IP = (config['SectionOne']['ELASTICSEARCH_IP'])
 nrOfResults = 0
+
+
+def es_get_distinct_ips(index):
+    results = IPSet()
+    es = Elasticsearch(([{'host': ES_IP}]))
+    res_count = es.count(index=index)
+    count = res_count['count']
+    res = es.search(index=index,
+                    body={"size": 0, "aggs": {"distinct_ip": {"terms": {"field": "ip", "size": count}}}})
+    for hit in res['aggregations']['distinct_ip']['buckets']:
+        results.add(hit)
 
 
 def censys_get_latest_ipv4_tables():
