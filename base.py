@@ -7,7 +7,7 @@ import json
 import string
 
 config = configparser.ConfigParser()
-config.read("keys.ini")
+config.read("config.ini")
 CENSYS_API_ID = (config['SectionOne']['CENSYS_API_ID'])
 CENSYS_API_KEY = (config['SectionOne']['CENSYS_API_KEY'])
 SHODAN_API_KEY = (config['SectionOne']['SHODAN_API_KEY'])

@@ -11,7 +11,7 @@ import queue
 from base import get_cidr_from_user_input
 from base import parse_all_cidrs_from_file
 
-url = 'http://ipinfo.dutchsec.nl/submit'
+url = 'https://ipinfo.dutchsec.nl/submit'
 headers = {'Content-Type': 'text/plain', 'Accept': 'text/json'}
 path_output_file = 'outputfiles/ipinfo/ipinfo.json'
 result_list = []

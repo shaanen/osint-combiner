@@ -1,13 +1,17 @@
 # vulnerabilityfinder
 Combining OSINT sources in Elastic Stack
 
-This project contains various Python3 scripts for gathering data from OSINT sources.
+This project contains: 
++ various Python3 scripts for gathering data from OSINT sources; 
++ logstash config file
 
-Project needs a file named "keys.ini" with API keys with the following syntax:
+Project needs a file named "config.ini" with the following syntax:
 
 [SectionOne]
 
-shodanapikey: *{Shodan API key here}*
+ELASTICSEARCH_IP: *{IP of Elasticsearch cluster here}*
+
+SHODANAPIKEY: *{Shodan API key here}*
 
 CENSYS_API_ID: *{Censys API ID here}* 
 

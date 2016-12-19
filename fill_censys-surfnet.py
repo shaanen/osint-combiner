@@ -8,7 +8,7 @@ from base import censys_get_user_input
 HOST = 'localhost'
 PORT = 5041
 config = configparser.ConfigParser()
-config.read("keys.ini")
+config.read("config.ini")
 CENSYS_API_ID = (config['SectionOne']['CENSYS_API_ID'])
 CENSYS_API_KEY = (config['SectionOne']['CENSYS_API_KEY'])
 nrOfResults = 0

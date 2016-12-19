@@ -6,7 +6,7 @@ from base import censys_get_user_input_asn
 from base import censys_get_latest_ipv4_tables
 
 config = configparser.ConfigParser()
-config.read("keys.ini")
+config.read("config.ini")
 CENSYS_API_ID = (config['SectionOne']['CENSYS_API_ID'])
 CENSYS_API_KEY = (config['SectionOne']['CENSYS_API_KEY'])
 nrOfResults = 0

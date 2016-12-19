@@ -2,7 +2,7 @@ import configparser
 import zoomeye
 
 config = configparser.ConfigParser()
-config.read("keys.ini")
+config.read("config.ini")
 ZOOMEYE_USERNAME = (config['SectionOne']['ZOOMEYE_USERNAME'])
 ZOOMEYE_PASSWORD = (config['SectionOne']['ZOOMEYE_PASSWORD'])
 nrOfResults = 0

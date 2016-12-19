@@ -4,7 +4,7 @@ import json
 from base import shodan_get_user_input_queries
 
 config = configparser.ConfigParser()
-config.read("keys.ini")
+config.read("config.ini")
 SHODAN_API_KEY = (config['SectionOne']['SHODAN_API_KEY'])
 api = shodan.Shodan(SHODAN_API_KEY)
 nrOfResults = 0
