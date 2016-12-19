@@ -13,7 +13,7 @@ from base import get_cidr_from_user_input
 from base import parse_all_cidrs_from_file
 from base import es_get_distinct_ips
 
-url = 'https://ipinfo.dutchsec.nl/submit'
+url = 'http://ipinfo.dutchsec.nl/submit'
 headers = {'Content-Type': 'text/plain', 'Accept': 'text/json'}
 path_output_file = 'outputfiles/ipinfo/ipinfo.json'
 result_list = []
@@ -25,11 +25,8 @@ timeout_err_counter = 0
 timeout_err_lock = threading.Lock()
 exitFlag = 0
 queueLock = threading.Lock()
-# nr_threads = 32
 workQueue = queue.Queue(0)
 threads = []
-# IPs = base.get_cidr_from_user_input()
-#IPs = IPNetwork('194.53.92.0/24')
 
 
 # Threading class for one GET request
@@ -72,14 +69,15 @@ class GetIpInfoThread (threading.Thread):
             time.sleep(1)
 
 
-def cidr_to_ipinfo(IPs):
+def cidr_to_ipinfo(input):
     global exitFlag
     nr_threads = 0
-    if IPs.size < 16:
-        nr_threads = IPs.size
+    if input.size < 16:
+        nr_threads = input.size
     else:
         nr_threads = 16
-    print('CIDR ' + str(IPs) + ' (' + str(IPs.size) + ' total)')
+    if type(IPNetwork, input):
+        print('CIDR ' + str(input) + ' (' + str(input.size) + ' total)')
     start_time = time.time()
 
     for num in range(1, nr_threads + 1):
@@ -89,7 +87,7 @@ def cidr_to_ipinfo(IPs):
 
     # Fill the queue
     with queueLock:
-        for ip in IPs:
+        for ip in input:
             workQueue.put(ip)
 
     # Wait for queue to empty
