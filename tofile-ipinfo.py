@@ -76,7 +76,7 @@ def cidr_to_ipinfo(input):
         nr_threads = input.size
     else:
         nr_threads = 16
-    if type(IPNetwork, input):
+    if type(input) is IPNetwork:
         print('CIDR ' + str(input) + ' (' + str(input.size) + ' total)')
     start_time = time.time()
 
