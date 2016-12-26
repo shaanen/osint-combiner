@@ -40,26 +40,6 @@ def censys_get_latest_ipv4_tables():
     return max(numbers)
 
 
-# Returns a non empty set of strings
-def shodan_get_user_input_queries():
-    queries = set()
-    done = False
-    while not done:
-        items = {'1': 'blablablabla', '2': 'asn:AS1101', '3': 'custom query', '4': 'done'}
-        choice = '0'
-        while choice not in items:
-            choice = input("Choose query: (1='blablablabla' 2='asn:AS1101' 3='custom query'). 4=done")
-        chosen_query = items[choice]
-        if chosen_query is items['3']:
-            chosen_query = input("Enter Query: ")
-        elif chosen_query is items['4']:
-            if queries != set():
-                done = True
-        if chosen_query is not items['4']:
-            queries.add(chosen_query)
-    return queries
-
-
 def censys_get_user_input_asn():
     asn = -1
     valid_asn = False
@@ -103,35 +83,45 @@ def parse_all_cidrs_from_file(file_path):
     return l
 
 
-def to_file_shodan(queries, path_output_file):
-    api = shodan.Shodan(SHODAN_API_KEY)
-    nr_total_results = 0
-    failed_queries = set()
-    for query in queries:
-        results = []
-        try:
-            for banner in api.search_cursor(query):
-                results.append(json.dumps(banner) + '\n')
-                print('\r' + str(len(results)) + ' results fetched...', end='')
-        except shodan.APIError as e:
-            print('Error: ', e)
-            failed_queries.add(failed_queries)
-        with open(path_output_file, "a") as output_file:
-            for banner in results:
-                output_file.write(banner)
-        print('\r' + str(len(results)) + ' results written from query(' + query + ')')
-        nr_total_results += len(results)
-    # Print failed queries if present
-    if not failed_queries == set():
-        print('Failed queries: ', failed_queries)
-    print(str(nr_total_results) + ' total results written in ' + path_output_file)
-
-
 # valid file names may only contain: ascii_lowercase, digits, dot, dash, underscore
 def is_valid_file_name(str_input):
     allowed = set(string.ascii_lowercase + string.digits + '.-_')
     if str_input is not '':
         return set(str_input) <= allowed
     return False
+
+
+def dict_add_source_prefix(obj, source_str, shodan_protocol_str=''):
+    """Return dict where any non-nested element (except 'ip and ip_int') is prefixed by the OSINT source name"""
+    keys_not_port_prefixed = ['asn', 'data', 'ip', 'ipv6 port', 'hostnames', 'domains', 'location',
+                              'location.area_code', 'location.city',  'location.country_code', 'location.country_code3',
+                              'location.country_name', 'location.dma_code', 'location.latitude',  'location.longitude',
+                              'location.postal_code', 'location.region_code', 'opts', 'org', 'isp', 'os', 'transport',
+                              'protocols']
+    for key in obj.keys():
+        # prefix all non-nested elements except ip and ip_int
+        if '.' not in key and key is not 'ip' and key is not 'ip_int':
+            # if anything else then shodan, just prefix source
+            if shodan_protocol_str is '':
+                new_key = key.replace(key, (source_str + "." + key))
+            # if shodan
+            else:
+                # just prefix source if general shodan key
+                if key in keys_not_port_prefixed:
+                    new_key = key.replace(key, (source_str + "." + key))
+                # prefix source AND shodan.module (protocol) if protocol-specific key
+                else:
+                    new_key = key.replace(key, (source_str + "." + shodan_protocol_str + '.' + key))
+            if new_key != key:
+                obj[new_key] = obj[key]
+                del obj[key]
+    return obj
+
+
+def print_json_tree(df, indent='  '):
+    for key in df.keys():
+        print(indent+str(key))
+        if isinstance(df[key], dict):
+            print_json_tree(df[key], indent + '   ')
 
 # def zoomeye_get_access_token(username, password):
