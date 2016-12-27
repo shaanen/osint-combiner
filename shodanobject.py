@@ -86,7 +86,7 @@ class ShodanObject:
         print(str(nr_total_results) + ' total results written in ' + path_output_file)
 
     @staticmethod
-    def get_shodan_input_choice(self):
+    def get_input_choice(self):
         """Returns input_choice represented as integer"""
         items = {'1': 'console_input', '2': 'cidr_file_input'}
         input_choice = '0'

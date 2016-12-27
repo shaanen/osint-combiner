@@ -11,7 +11,7 @@ while not is_valid_file_name(output_file):
 path_output_file = 'outputfiles/shodan/' + output_file
 
 
-choice = shodan.get_shodan_input_choice(shodan)
+choice = shodan.get_input_choice(shodan)
 queries = set()
 if choice is 1:
     queries = shodan.get_user_input_queries()
