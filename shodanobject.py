@@ -14,7 +14,7 @@ class ShodanObject:
         self.api = api = shodan.Shodan(self.SHODAN_API_KEY)
 
     @staticmethod
-    def shodan_to_es_convert(self, input_str):
+    def to_es_convert(self, input_str):
         """Return str ready to be sent to Logstash."""
         input_json = json.loads(input_str)
 
@@ -40,8 +40,8 @@ class ShodanObject:
         # the rest of the data in _shodan is irrelevant
         del input_json['_shodan']
 
-        # asn value to lowercase
-        input_json['asn'] = str.lower(input_json['asn'])
+        # asn to int
+        input_json['asn'] = int((input_json['asn'])[2:])
         # rename location.country_name to location.country
         input_json['location']['country'] = input_json['location']['country_name']
         del input_json['location']['country_name']
@@ -69,7 +69,7 @@ class ShodanObject:
             results = []
             try:
                 for banner in self.api.search_cursor(query):
-                    banner = self.shodan_to_es_convert(self, json.dumps(banner))
+                    banner = self.to_es_convert(self, json.dumps(banner))
                     results.append(banner + '\n')
                     print('\r' + str(len(results)) + ' results fetched...', end='')
             except shodan.APIError as e:

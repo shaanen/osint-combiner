@@ -19,5 +19,5 @@ path_output_file = output_file_path_prefix + output_file_name
 shodan = ShodanObject()
 with open(path_output_file, 'w') as output_file:
     for banner in input_file.open():
-        output_file.write(shodan.shodan_to_es_convert(shodan, banner) + '\n')
+        output_file.write(shodan.to_es_convert(shodan, banner) + '\n')
 print('Converted ' + input_file_path + ' to ' + output_file.name)
