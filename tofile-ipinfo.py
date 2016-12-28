@@ -1,11 +1,9 @@
 #!/usr/bin/env python
-# Reads CIDRs from user input, uses ipinfo for each IP, saves output to outputfiles/ipinfo/ipinfo.json
-from netaddr import IPSet
 from netaddr import IPNetwork
 import threading
 import requests
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 import time
 import os
 import queue
@@ -50,7 +48,7 @@ class GetIpInfoThread (threading.Thread):
                     try:
                         resp = requests.post(url, headers=headers, data=str(self.data), timeout=20)
                         resp_json = json.loads(resp.text)
-                        resp_json['timestamp'] = str(datetime.now())
+                        resp_json['timestamp'] = str(datetime.now(timezone.utc).isoformat())
                         result_list.append(json.dumps(resp_json))
                         got_valid_response = True
                         with done_counter_lock:
