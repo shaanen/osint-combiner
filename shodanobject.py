@@ -14,47 +14,46 @@ class ShodanObject:
         self.api = api = shodan.Shodan(self.SHODAN_API_KEY)
 
     @staticmethod
-    def to_es_convert(self, input_str):
-        """Return str ready to be sent to Logstash."""
-        input_json = json.loads(input_str)
+    def to_es_convert(self, input_dict):
+        """Return dict ready to be sent to Logstash."""
 
         # set ip and ip_int
-        ip_int = input_json['ip']
-        del input_json['ip']
-        input_json['ip'] = input_json['ip_str']
-        input_json['ip_int'] = ip_int
-        del input_json['ip_str']
+        ip_int = input_dict['ip']
+        del input_dict['ip']
+        input_dict['ip'] = input_dict['ip_str']
+        input_dict['ip_int'] = ip_int
+        del input_dict['ip_str']
 
         # if present, convert ssl.cert.serial to string
         try:
-            input_json['ssl']['cert']['serial'] = str(input_json['ssl']['cert']['serial'])
+            input_dict['ssl']['cert']['serial'] = str(input_dict['ssl']['cert']['serial'])
         except KeyError:
             pass
         # if present, convert ssl.dhparams.generator to string
         try:
-            input_json['ssl']['dhparams']['generator'] = str(input_json['ssl']['dhparams']['generator'])
+            input_dict['ssl']['dhparams']['generator'] = str(input_dict['ssl']['dhparams']['generator'])
         except (KeyError, TypeError):
             pass
         # rename_shodan.modules to protocols (used as prefix per Shodan banner for combining multiple banners into 1 IP)
-        input_json['protocols'] = input_json['_shodan']['module']
+        input_dict['protocols'] = input_dict['_shodan']['module']
         # the rest of the data in _shodan is irrelevant
-        del input_json['_shodan']
+        del input_dict['_shodan']
 
         # asn to int
-        input_json['asn'] = int((input_json['asn'])[2:])
+        input_dict['asn'] = int((input_dict['asn'])[2:])
         # rename location.country_name to location.country
-        input_json['location']['country'] = input_json['location']['country_name']
-        del input_json['location']['country_name']
+        input_dict['location']['country'] = input_dict['location']['country_name']
+        del input_dict['location']['country_name']
         # rename latitude and longitude for geoip
-        input_json['location']['geo'] = {}
-        input_json['location']['geo']['lat'] = input_json['location']['latitude']
-        input_json['location']['geo']['lon'] = input_json['location']['longitude']
-        del input_json['location']['latitude']
-        del input_json['location']['longitude']
+        input_dict['location']['geo'] = {}
+        input_dict['location']['geo']['lat'] = input_dict['location']['latitude']
+        input_dict['location']['geo']['lon'] = input_dict['location']['longitude']
+        del input_dict['location']['latitude']
+        del input_dict['location']['longitude']
 
         # prefix non-nested fields with 'shodan'
-        input_json = dict_add_source_prefix(input_json, 'shodan', str(input_json['protocols']))
-        return json.dumps(input_json)
+        input_dict = dict_add_source_prefix(input_dict, 'shodan', str(input_dict['protocols']))
+        return input_dict
 
     @staticmethod
     def to_file_shodan(self, queries, path_output_file):
