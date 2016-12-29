@@ -141,6 +141,7 @@ elif choice is '3':
     str_input_es_index = ''
     index_exists = False
     while not index_exists:
+        str_input_es_index = ''
         while not is_valid_es_index_name(str_input_es_index):
             str_input_es_index = input('Elasticsearch index name:')
         if exists_es_index(str_input_es_index):
