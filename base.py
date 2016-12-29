@@ -14,17 +14,24 @@ ES_IP = (config['SectionOne']['ELASTICSEARCH_IP'])
 nrOfResults = 0
 
 
-def es_get_distinct_ips(index):
+def es_get_distinct_ips(str_existing_index):
     """Returns set of IPs stored in given Elasticsearch index"""
     results = IPSet()
     es = Elasticsearch(([{'host': ES_IP}]))
-    res_count = es.count(index=index)
+    res_count = es.count(index=str_existing_index)
     count = res_count['count']
-    res = es.search(index=index,
+    res = es.search(index=str_existing_index,
                     body={"size": 0, "aggs": {"distinct_ip": {"terms": {"field": "ip", "size": count}}}})
     for hit in res['aggregations']['distinct_ip']['buckets']:
         results.add(hit["key"])
     return results
+
+
+def exists_es_index(str_valid_index):
+    """Return if given index string exists in ElasticSearch cluster"""
+    es = Elasticsearch(([{'host': ES_IP}]))
+    es_indices = es.indices
+    return es_indices.exists(index=str_valid_index)
 
 
 def get_cidr_from_user_input():
