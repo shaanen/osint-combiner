@@ -29,6 +29,7 @@ def es_get_distinct_ips(str_existing_index):
 
 def exists_es_index(str_valid_index):
     """Return if given index string exists in ElasticSearch cluster"""
+
     es = Elasticsearch(([{'host': ES_IP}]))
     es_indices = es.indices
     return es_indices.exists(index=str_valid_index)

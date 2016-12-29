@@ -10,6 +10,8 @@ import queue
 from base import get_cidr_from_user_input
 from base import parse_all_cidrs_from_file
 from base import es_get_distinct_ips
+from base import is_valid_es_index_name
+from base import exists_es_index
 
 url = 'http://ipinfo.dutchsec.nl/submit'
 headers = {'Content-Type': 'text/plain', 'Accept': 'text/json'}
@@ -136,5 +138,14 @@ elif choice is '2':
 
         cidr_to_ipinfo(IPNetwork(cidr))
 elif choice is '3':
-    IPs = es_get_distinct_ips('as1103-new')
+    str_input_es_index = ''
+    index_exists = False
+    while not index_exists:
+        while not is_valid_es_index_name(str_input_es_index):
+            str_input_es_index = input('Elasticsearch index name:')
+        if exists_es_index(str_input_es_index):
+            index_exists = True
+        else:
+            print('Index does not exist')
+    IPs = es_get_distinct_ips(str_input_es_index)
     cidr_to_ipinfo(IPs)
