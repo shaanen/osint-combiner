@@ -11,14 +11,14 @@ while not input_file.is_file():
     input_file_path = input('Input file (with path from project root):')
     input_file = Path(input_file_path)
 
-output_file_name = ''
-output_file_path_prefix = 'outputfiles/shodan/'
-while not is_valid_file_name(output_file_name):
-    output_file_name = input('Output file:' + output_file_path_prefix)
-output_file_path = output_file_path_prefix + output_file_name
+str_name_output_file = ''
+str_prefix_output_file = 'outputfiles/shodan/'
+while not is_valid_file_name(str_name_output_file):
+    str_name_output_file = input('Output file:' + str_prefix_output_file)
+str_path_output_file = str_prefix_output_file + str_name_output_file
 
 shodan = ShodanObject()
-with open(output_file_path, 'w') as output_file:
+with open(str_path_output_file, 'w') as output_file:
     for str_banner in input_file.open():
         banner = dict_clean_empty(json.loads(str_banner))
         shodan.to_es_convert(shodan, banner)

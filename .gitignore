@@ -49,5 +49,8 @@ temp.py
 *.pyc 
 __pycache__/
 
+# files with specific IP ranges
+ipranges.csv
+
 
 

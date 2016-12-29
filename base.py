@@ -56,6 +56,14 @@ def is_valid_file_name(str_input):
     return False
 
 
+def is_valid_es_index_name(str_input):
+    """Returns if str is valid Elasticsearch index name. May only contain: ascii_lowercase, digits, dash, underscore"""
+    allowed = set(string.ascii_lowercase + string.digits + '-_')
+    if str_input is not '':
+        return set(str_input) <= allowed
+    return False
+
+
 def dict_add_source_prefix(obj, source_str, shodan_protocol_str=''):
     """Return dict where any non-nested element (except 'ip and ip_int') is prefixed by the OSINT source name"""
     keys_not_source_prefixed = ['ip', 'asn', 'ip_int']
