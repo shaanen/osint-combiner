@@ -43,9 +43,6 @@ fabric.properties
 # config.ini containing configuration for scripts
 config.ini
 
-# Temporary local scripts
-temp.py
-
 *.pyc 
 __pycache__/
 
