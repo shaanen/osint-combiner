@@ -4,6 +4,7 @@ from netaddr import IPNetwork
 from netaddr import IPSet
 import re
 import string
+import time
 
 config = configparser.ConfigParser()
 config.read("config.ini")
@@ -20,10 +21,13 @@ def es_get_distinct_ips(str_existing_index):
     es = Elasticsearch(([{'host': ES_IP}]))
     res_count = es.count(index=str_existing_index)
     count = res_count['count']
+    start_time = time.time()
     res = es.search(index=str_existing_index,
-                    body={"size": 0, "aggs": {"distinct_ip": {"terms": {"field": "ip", "size": count}}}})
+                    body={"size": 0, "aggs": {"distinct_ip": {"terms": {"field": "_id", "size": count}}}})
     for hit in res['aggregations']['distinct_ip']['buckets']:
         results.add(hit["key"])
+    elapsed_time = time.time() - start_time
+    print(str(len(results)) + ' distinct IPs fetchted in ' + str(elapsed_time))
     return results
 
 
