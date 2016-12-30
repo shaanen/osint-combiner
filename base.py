@@ -15,26 +15,16 @@ ES_IP = (config['SectionOne']['ELASTICSEARCH_IP'])
 nrOfResults = 0
 
 
-def es_get_distinct_ips_maybe_faster(str_existing_index):
-    """Returns set of IPs stored in given Elasticsearch index"""
-    es = Elasticsearch(([{'host': ES_IP}]))
-    start_time = time.time()
-    scroll = helpers.scan(es, query='{"fields": "_id"}', index=str_existing_index, scroll='10s')
-    elapsed_time = time.time() - start_time
-    print(str(len(scroll)) + ' distinct IPs fetched in ' + str(elapsed_time))
-    return scroll
-
-
 def es_get_distinct_ips(str_existing_index):
     """Returns set of IPs stored in given Elasticsearch index"""
+    list_output = []
     es = Elasticsearch(([{'host': ES_IP}]))
     count = es.count(index=str_existing_index)['count']
-    start_time = time.time()
     res = es.search(index=str_existing_index,
                     body={"size": 0, "aggs": {"distinct_ip": {"terms": {"field": "ip", "size": count}}}})
-    elapsed_time = time.time() - start_time
-    print(str(len(res)) + ' distinct IPs fetched in ' + str(elapsed_time))
-    return res['aggregations']['distinct_ip']['buckets']
+    for key in res['aggregations']['distinct_ip']['buckets']:
+        list_output.append(key['key'])
+    return list_output
 
 
 def exists_es_index(str_valid_index):
