@@ -1,6 +1,4 @@
 from base import dict_add_source_prefix
-from datetime import datetime, timezone
-from netaddr import IPNetwork
 import threading
 import requests
 import json
@@ -8,17 +6,9 @@ from datetime import datetime, timezone
 import time
 import os
 import queue
-from base import get_cidr_from_user_input
-from base import parse_all_cidrs_from_file
-from base import es_get_distinct_ips
 
 
 class IpInfoObject:
-
-    def __init__(self):
-        """Return an IpInfoObject initialised with API key"""
-        self.url = 'http://ipinfo.dutchsec.nl/submit'
-        self.headers = {'Content-Type': 'text/plain', 'Accept': 'text/json'}
 
     @staticmethod
     def to_es_convert(self, input_dict):
@@ -58,27 +48,44 @@ class IpInfoObject:
         input_dict = dict_add_source_prefix(input_dict, 'ipinfo')
         return input_dict
 
-    @staticmethod
-    def cidr_to_ipinfo(cidr_input, path_output_file):
+    def cidr_to_ipinfo(self, cidr_input, path_output_file):
         """Makes IpInfo request for every given IP and writes to given outputfile"""
+        result_list = []
+        done_counter = 0
+        done_counter_lock = threading.Lock()
+        connection_err_counter = 0
+        connection_err_lock = threading.Lock()
+        timeout_err_counter = 0
+        timeout_err_lock = threading.Lock()
+        queue_lock = threading.Lock()
+        work_queue = queue.Queue(0)
+        threads = []
+        nr_threads = 0
+        exit_flag = 0
 
-        @staticmethod
         class GetIpInfoThread(threading.Thread):
             """Thread which does one GET request at a time"""
             def __init__(self, q):
                 threading.Thread.__init__(self)
+                self.url = 'http://ipinfo.dutchsec.nl/submit'
+                self.headers = {'Content-Type': 'text/plain', 'Accept': 'text/json'}
                 self.q = q
                 self.data = ''
 
             def run(self):
                 global done_counter
+                global done_counter_lock
                 global connection_err_counter
+                global connection_err_lock
                 global timeout_err_counter
-                while not exitFlag:
-                    queueLock.acquire()
-                    if not workQueue.empty():
+                global timeout_err_lock
+                global result_list
+                global queue_lock
+                while not exit_flag:
+                    queue_lock.acquire()
+                    if not work_queue.empty():
                         self.data = self.q.get()
-                        queueLock.release()
+                        queue_lock.release()
                         got_valid_response = False
                         while not got_valid_response:
                             try:
@@ -100,45 +107,32 @@ class IpInfoObject:
                                     connection_err_counter) + ' connection errors, '
                                       + str(timeout_err_counter) + ' timeouts', end='')
                     else:
-                        queueLock.release()
+                        queue_lock.release()
                     time.sleep(1)
 
-        done_counter = 0
-        done_counter_lock = threading.Lock()
-        connection_err_counter = 0
-        connection_err_lock = threading.Lock()
-        timeout_err_counter = 0
-        timeout_err_lock = threading.Lock()
-        exitFlag = 0
-        queueLock = threading.Lock()
-        workQueue = queue.Queue(0)
-        threads = []
-        global exitFlag
-        nr_threads = 0
         if cidr_input.size < 16:
             nr_threads = cidr_input.size
         else:
             nr_threads = 16
-        if type(cidr_input) is IPNetwork:
-            print('CIDR ' + str(cidr_input) + ' (' + str(cidr_input.size) + ' total)')
+        print('CIDR ' + str(cidr_input) + ' (' + str(cidr_input.size) + ' total)')
         start_time = time.time()
 
         for num in range(1, nr_threads + 1):
-            thread = GetIpInfoThread(workQueue)
+            thread = GetIpInfoThread(work_queue)
             thread.start()
             threads.append(thread)
 
         # Fill the queue
-        with queueLock:
+        with queue_lock:
             for ip in cidr_input:
-                workQueue.put(ip)
+                work_queue.put(ip)
 
         # Wait for queue to empty
-        while not workQueue.empty():
+        while not work_queue.empty():
             pass
 
         # Notify threads it's time to exit
-        exitFlag = 1
+        exit_flag = 1
 
         # Wait for all GetIpInfoThreads to complete
         for t in threads:

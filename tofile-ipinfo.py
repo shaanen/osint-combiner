@@ -7,15 +7,16 @@ from datetime import datetime, timezone
 import time
 import os
 import queue
+from ipinfoobject import IpInfoObject
 from base import get_cidr_from_user_input
 from base import parse_all_cidrs_from_file
 from base import es_get_distinct_ips
 from base import is_valid_es_index_name
+from base import is_valid_file_name
 from base import exists_es_index
 
 url = 'http://ipinfo.dutchsec.nl/submit'
 headers = {'Content-Type': 'text/plain', 'Accept': 'text/json'}
-path_output_file = 'outputfiles/ipinfo/ipinfo.json'
 result_list = []
 done_counter = 0
 done_counter_lock = threading.Lock()
@@ -69,15 +70,15 @@ class GetIpInfoThread (threading.Thread):
             time.sleep(1)
 
 
-def cidr_to_ipinfo(input):
+def cidr_to_ipinfo(cidr_input, path_output_file):
     global exitFlag
     nr_threads = 0
-    if input.size < 16:
-        nr_threads = input.size
+    if cidr_input.size < 16:
+        nr_threads = cidr_input.size
     else:
         nr_threads = 16
-    if type(input) is IPNetwork:
-        print('CIDR ' + str(input) + ' (' + str(input.size) + ' total)')
+    if type(cidr_input) is IPNetwork:
+        print('CIDR ' + str(cidr_input) + ' (' + str(cidr_input.size) + ' total)')
     start_time = time.time()
 
     for num in range(1, nr_threads + 1):
@@ -87,7 +88,7 @@ def cidr_to_ipinfo(input):
 
     # Fill the queue
     with queueLock:
-        for ip in input:
+        for ip in cidr_input:
             workQueue.put(ip)
 
     # Wait for queue to empty
@@ -115,29 +116,31 @@ def cidr_to_ipinfo(input):
         output_file.write('\n'.join(result_list))
     print('\r' + str(len(result_list)) + ' results written in ' + path_output_file, end='')
 
-
-def get_choice():
-    items = {'1': 'console_input', '2': 'cidr_file_input', '3': 'elasticsearch_input'}
-    nr = '0'
-    while nr not in items:
-        nr = input("Console input[1], CIDR file input[2] or Elasticsearch input[3]?")
-    return nr
-
-choice = get_choice()
+ipinfo = IpInfoObject()
+choice = ipinfo.get_input_choice(ipinfo)
 cidrs = set()
-if choice is '1':
-    cidr_to_ipinfo(IPNetwork(get_cidr_from_user_input()))
-elif choice is '2':
+
+str_name_output_file = ''
+str_prefix_output_file = 'outputfiles/ipinfo/'
+while not is_valid_file_name(str_name_output_file):
+    str_name_output_file = input('Output file:' + str_prefix_output_file)
+str_path_output_file = str_prefix_output_file + str_name_output_file
+
+# 1= console input
+if choice is 1:
+    cidr_to_ipinfo(IPNetwork(get_cidr_from_user_input()), str_path_output_file)
+# 2= CIDR file input
+elif choice is 2:
     input_file_path = ''
     while not os.path.isfile(input_file_path):
         input_file_path = input('Input file:')
     cidrs = parse_all_cidrs_from_file(input_file_path)
     print(cidrs, sep='\n')
     for cidr in cidrs:
-        print('--Starting with CIDR: ' + cidr + ' (' + (str(cidrs.index(cidr) + 1 )) + '/' + str(len(cidrs)) + ')--')
-
-        cidr_to_ipinfo(IPNetwork(cidr))
-elif choice is '3':
+        print('--Starting with CIDR: ' + cidr + ' (' + (str(cidrs.index(cidr) + 1)) + '/' + str(len(cidrs)) + ')--')
+        cidr_to_ipinfo(IPNetwork(cidr), str_path_output_file)
+# 3= Elasticsearch Input
+elif choice is 3:
     str_input_es_index = ''
     index_exists = False
     while not index_exists:
@@ -149,4 +152,4 @@ elif choice is '3':
         else:
             print('Index does not exist')
     IPs = es_get_distinct_ips(str_input_es_index)
-    cidr_to_ipinfo(IPs)
+    cidr_to_ipinfo(IPs, str_path_output_file)

@@ -1,10 +1,12 @@
 from elasticsearch import Elasticsearch
 from elasticsearch import helpers
+from elasticsearch import exceptions
 import configparser
 from netaddr import IPNetwork
 import re
 import string
 import time
+import sys
 
 config = configparser.ConfigParser()
 config.read("config.ini")
@@ -39,10 +41,16 @@ def es_get_distinct_ips(str_existing_index):
 
 def exists_es_index(str_valid_index):
     """Return if given index string exists in ElasticSearch cluster"""
-
-    es = Elasticsearch(([{'host': ES_IP}]))
-    es_indices = es.indices
-    return es_indices.exists(index=str_valid_index)
+    connection_attempts = 0
+    while connection_attempts < 3:
+        try:
+            es = Elasticsearch(([{'host': ES_IP}]))
+            es_indices = es.indices
+            return es_indices.exists(index=str_valid_index)
+        except exceptions.ConnectionTimeout:
+            connection_attempts += 1
+    print('Elasticsearch connection timeout, exiting now...')
+    sys.exit(1)
 
 
 def get_cidr_from_user_input():
