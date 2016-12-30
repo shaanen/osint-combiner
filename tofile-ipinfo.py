@@ -73,12 +73,14 @@ class GetIpInfoThread (threading.Thread):
 def cidr_to_ipinfo(cidr_input, path_output_file):
     global exitFlag
     nr_threads = 0
-    if cidr_input.size < 16:
-        nr_threads = cidr_input.size
+    if len(cidr_input) < 16:
+        nr_threads = len(cidr_input)
     else:
         nr_threads = 16
     if type(cidr_input) is IPNetwork:
         print('CIDR ' + str(cidr_input) + ' (' + str(cidr_input.size) + ' total)')
+    elif type(cidr_input) is list:
+        print('List of IPs (' + str(len(cidr_input)) + ' total)')
     start_time = time.time()
 
     for num in range(1, nr_threads + 1):
@@ -104,7 +106,9 @@ def cidr_to_ipinfo(cidr_input, path_output_file):
     print('')
 
     # Print useful statistics
-    print(str((connection_err_counter + timeout_err_counter)) + ' times retried an IP')
+    total_retries = connection_err_counter + timeout_err_counter
+    if total_retries is not 0:
+        print(str(total_retries) + ' times retried an IP')
     print(str(round((time.time() - start_time))) + ' seconds needed for getting all responses')
 
     # Write all responses to file
