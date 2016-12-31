@@ -1,12 +1,11 @@
 from elasticsearch import Elasticsearch
-from elasticsearch import helpers
 from elasticsearch import exceptions
 import configparser
 from netaddr import IPNetwork
 import re
 import string
-import time
 import sys
+from pathlib import Path
 
 config = configparser.ConfigParser()
 config.read("config.ini")
@@ -124,5 +123,24 @@ def dict_clean_empty(d):
     if isinstance(d, list):
         return [v for v in (dict_clean_empty(v) for v in d) if v]
     return {k: v for k, v in ((k, dict_clean_empty(v)) for k, v in d.items()) if v or v == 0}
+
+
+def ask_input_file():
+    """Return existing file from user input"""
+    input_file = Path('')
+    input_file_path = ''
+    while not input_file.is_file():
+        input_file_path = input('Input file (with path from project root):')
+        input_file = Path(input_file_path)
+    return input_file
+
+
+def ask_output_file(str_prefix_output_file):
+    """Return valid file path string from user input """
+    str_name_output_file = ''
+    while not is_valid_file_name(str_name_output_file):
+        str_name_output_file = input('Output file:' + str_prefix_output_file)
+    return str_prefix_output_file + str_name_output_file
+
 
 

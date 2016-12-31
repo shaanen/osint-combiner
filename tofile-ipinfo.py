@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 from netaddr import IPNetwork
 import threading
 import requests

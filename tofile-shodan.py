@@ -14,8 +14,10 @@ path_output_file = 'outputfiles/shodan/' + output_file
 
 choice = shodan.get_input_choice(shodan)
 queries = set()
+# 1= console input
 if choice is 1:
     queries = shodan.get_user_input_queries()
+# 2= CIDR file input
 elif choice is 2:
     input_file_path = ''
     while not os.path.isfile(input_file_path):

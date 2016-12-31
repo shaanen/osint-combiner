@@ -2,15 +2,11 @@
 from censysobject import CensysObject
 from base import is_valid_file_name
 from base import dict_clean_empty
-from pathlib import Path
+from base import ask_input_file
 import json
 
-input_file = Path('')
-input_file_path = ''
 print('---Censys json converter---')
-while not input_file.is_file():
-    input_file_path = input('Input file (with path from project root):')
-    input_file = Path(input_file_path)
+input_file = ask_input_file()
 
 str_name_output_file = ''
 str_prefix_output_file = 'outputfiles/censys/'
