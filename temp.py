@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from base import is_valid_es_index_name
 from base import exists_es_index
 from base import es_get_distinct_ips

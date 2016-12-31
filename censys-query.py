@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import censys.query
 import configparser
 from base import censys_get_latest_ipv4_tables

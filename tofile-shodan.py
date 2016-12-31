@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from shodanobject import ShodanObject
 from base import parse_all_cidrs_from_file
 from base import is_valid_file_name

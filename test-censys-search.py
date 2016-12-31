@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import censys.ipv4
 import configparser
 import json

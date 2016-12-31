@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from ipinfoobject import IpInfoObject
 from netaddr import IPNetwork
 from base import get_cidr_from_user_input

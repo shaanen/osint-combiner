@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from netaddr import IPNetwork
 import threading
 import requests
@@ -20,7 +20,7 @@ headers = {'Content-Type': 'text/plain', 'Accept': 'text/json'}
 result_list = []
 done_counter = 0
 done_counter_lock = threading.Lock()
-connection_err_counter = 0
+conn_err_counter = 0
 connection_err_lock = threading.Lock()
 timeout_err_counter = 0
 timeout_err_lock = threading.Lock()
@@ -39,7 +39,7 @@ class GetIpInfoThread (threading.Thread):
 
     def run(self):
         global done_counter
-        global connection_err_counter
+        global conn_err_counter
         global timeout_err_counter
         while not exitFlag:
             queueLock.acquire()
@@ -58,12 +58,12 @@ class GetIpInfoThread (threading.Thread):
                             done_counter += 1
                     except requests.exceptions.ConnectionError:
                         with connection_err_lock:
-                            connection_err_counter += 1
+                            conn_err_counter += 1
                     except requests.exceptions.ReadTimeout:
                         with timeout_err_lock:
                             timeout_err_counter += 1
                     finally:
-                        print('\r' + str(done_counter) + ' done, ' + str(connection_err_counter) + ' connection errors, '
+                        print('\r' + str(done_counter) + ' done, ' + str(conn_err_counter) + ' connection errors, '
                               + str(timeout_err_counter) + ' timeouts', end='')
             else:
                 queueLock.release()
@@ -104,7 +104,7 @@ def cidr_to_ipinfo(cidr_input, path_output_file):
     print('')
 
     # Print useful statistics
-    print(str((connection_err_counter + timeout_err_counter)) + ' times retried an IP')
+    print(str((conn_err_counter + timeout_err_counter)) + ' times retried an IP')
     print(str(round((time.time() - start_time))) + ' seconds needed for getting all responses')
 
     # Write all responses to file

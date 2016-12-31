@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from shodanobject import ShodanObject
 from base import is_valid_file_name
 from base import dict_clean_empty

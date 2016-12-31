@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import censys.export
 import configparser
 import urllib.request
