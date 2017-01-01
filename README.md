@@ -2,8 +2,8 @@
 Combining OSINT sources in Elastic Stack
 
 This project contains: 
-+ various Python3 scripts for gathering data from OSINT sources; 
-+ logstash config file
++ various Python3 scripts for gathering data from OSINT sources, convert them so they fit into Elasticsearch and write the results to outputfiles/*; 
++ logstash config files which use the outputfiles as input for Elasticsearch.
 
 Project needs a file named "config.ini" with the following syntax:
 
