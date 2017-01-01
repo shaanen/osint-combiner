@@ -2,6 +2,7 @@ import shodan
 import configparser
 import json
 from base import dict_add_source_prefix
+from base import dict_clean_empty
 
 
 class ShodanObject:
@@ -68,8 +69,9 @@ class ShodanObject:
             results = []
             try:
                 for banner in self.api.search_cursor(query):
-                    banner = self.to_es_convert(self, json.dumps(banner))
-                    results.append(banner + '\n')
+                    banner = dict_clean_empty(banner)
+                    self.to_es_convert(self, banner)
+                    results.append(json.dumps(banner) + '\n')
                     print('\r' + str(len(results)) + ' results fetched...', end='')
             except shodan.APIError as e:
                 print('Error: ', e)

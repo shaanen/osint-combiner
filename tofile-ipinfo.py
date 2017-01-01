@@ -12,8 +12,9 @@ from base import get_cidr_from_user_input
 from base import parse_all_cidrs_from_file
 from base import es_get_distinct_ips
 from base import is_valid_es_index_name
-from base import is_valid_file_name
 from base import exists_es_index
+from base import ask_output_file
+from base import dict_clean_empty
 
 url = 'http://ipinfo.dutchsec.nl/submit'
 headers = {'Content-Type': 'text/plain', 'Accept': 'text/json'}
@@ -71,6 +72,7 @@ class GetIpInfoThread (threading.Thread):
 
 
 def cidr_to_ipinfo(cidr_input, path_output_file):
+    """Makes ipinfo request for every given IP or CIDR and writes to given file"""
     global exitFlag
     nr_threads = 0
     if cidr_input.size < 16:
@@ -109,22 +111,20 @@ def cidr_to_ipinfo(cidr_input, path_output_file):
 
     # Write all responses to file
     with open(path_output_file, 'a') as output_file:
+
         # Writing newline if file is not empty
         if os.stat(path_output_file).st_size != 0:
             output_file.write('\n')
-
-        output_file.write('\n'.join(result_list))
+        # Remove empty elements, convert and write to output file
+        for str_banner in result_list:
+            banner = dict_clean_empty(json.loads(str_banner))
+            ipinfo.to_es_convert(ipinfo, banner)
+            output_file.write(json.dumps(banner) + '\n')
     print('\r' + str(len(result_list)) + ' results written in ' + path_output_file, end='')
 
 ipinfo = IpInfoObject()
 choice = ipinfo.get_input_choice(ipinfo)
-cidrs = set()
-
-str_name_output_file = ''
-str_prefix_output_file = 'outputfiles/ipinfo/'
-while not is_valid_file_name(str_name_output_file):
-    str_name_output_file = input('Output file:' + str_prefix_output_file)
-str_path_output_file = str_prefix_output_file + str_name_output_file
+str_path_output_file = ask_output_file('outputfiles/ipinfo/')
 
 # 1= console input
 if choice is 1:

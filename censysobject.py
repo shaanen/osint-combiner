@@ -1,5 +1,6 @@
 import configparser
 import censys.export
+import censys.query
 from base import dict_add_source_prefix
 import re
 
@@ -41,7 +42,7 @@ class CensysObject:
         return asn
 
     @staticmethod
-    def get_user_input(self):
+    def non_sql_get_user_input(self):
         """Returns (non-SQL) Censys query from user input"""
         items = {'2': 'autonomous_system.asn: 1101', '3': 'custom query'}
         choice = '0'
@@ -51,6 +52,10 @@ class CensysObject:
         if chosen_query is items['3']:
             chosen_query = input("Enter Query: ")
         return chosen_query
+
+    @staticmethod
+    def get_user_input(self):
+        """TODO: SQL choice"""
 
     @staticmethod
     def to_es_convert(self, input_dict):
