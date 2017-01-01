@@ -12,15 +12,16 @@ from base import get_cidr_from_user_input
 from base import parse_all_cidrs_from_file
 from base import es_get_distinct_ips
 from base import is_valid_es_index_name
-from base import is_valid_file_name
 from base import exists_es_index
+from base import ask_output_file
+from base import dict_clean_empty
 
 url = 'http://ipinfo.dutchsec.nl/submit'
 headers = {'Content-Type': 'text/plain', 'Accept': 'text/json'}
 result_list = []
 done_counter = 0
 done_counter_lock = threading.Lock()
-connection_err_counter = 0
+conn_err_counter = 0
 connection_err_lock = threading.Lock()
 timeout_err_counter = 0
 timeout_err_lock = threading.Lock()
@@ -39,7 +40,7 @@ class GetIpInfoThread (threading.Thread):
 
     def run(self):
         global done_counter
-        global connection_err_counter
+        global conn_err_counter
         global timeout_err_counter
         while not exitFlag:
             queueLock.acquire()
@@ -58,12 +59,12 @@ class GetIpInfoThread (threading.Thread):
                             done_counter += 1
                     except requests.exceptions.ConnectionError:
                         with connection_err_lock:
-                            connection_err_counter += 1
+                            conn_err_counter += 1
                     except requests.exceptions.ReadTimeout:
                         with timeout_err_lock:
                             timeout_err_counter += 1
                     finally:
-                        print('\r' + str(done_counter) + ' done, ' + str(connection_err_counter) + ' connection errors, '
+                        print('\r' + str(done_counter) + ' done, ' + str(conn_err_counter) + ' connection errors, '
                               + str(timeout_err_counter) + ' timeouts', end='')
             else:
                 queueLock.release()
@@ -71,16 +72,15 @@ class GetIpInfoThread (threading.Thread):
 
 
 def cidr_to_ipinfo(cidr_input, path_output_file):
+    """Makes ipinfo request for every given IP or CIDR and writes to given file"""
     global exitFlag
     nr_threads = 0
-    if len(cidr_input) < 16:
-        nr_threads = len(cidr_input)
+    if cidr_input.size < 16:
+        nr_threads = cidr_input.size
     else:
         nr_threads = 16
     if type(cidr_input) is IPNetwork:
         print('CIDR ' + str(cidr_input) + ' (' + str(cidr_input.size) + ' total)')
-    elif type(cidr_input) is list:
-        print('List of IPs (' + str(len(cidr_input)) + ' total)')
     start_time = time.time()
 
     for num in range(1, nr_threads + 1):
@@ -106,29 +106,25 @@ def cidr_to_ipinfo(cidr_input, path_output_file):
     print('')
 
     # Print useful statistics
-    total_retries = connection_err_counter + timeout_err_counter
-    if total_retries is not 0:
-        print(str(total_retries) + ' times retried an IP')
+    print(str((conn_err_counter + timeout_err_counter)) + ' times retried an IP')
     print(str(round((time.time() - start_time))) + ' seconds needed for getting all responses')
 
     # Write all responses to file
     with open(path_output_file, 'a') as output_file:
+
         # Writing newline if file is not empty
         if os.stat(path_output_file).st_size != 0:
             output_file.write('\n')
-
-        output_file.write('\n'.join(result_list))
+        # Remove empty elements, convert and write to output file
+        for str_banner in result_list:
+            banner = dict_clean_empty(json.loads(str_banner))
+            ipinfo.to_es_convert(ipinfo, banner)
+            output_file.write(json.dumps(banner) + '\n')
     print('\r' + str(len(result_list)) + ' results written in ' + path_output_file, end='')
 
 ipinfo = IpInfoObject()
 choice = ipinfo.get_input_choice(ipinfo)
-cidrs = set()
-
-str_name_output_file = ''
-str_prefix_output_file = 'outputfiles/ipinfo/'
-while not is_valid_file_name(str_name_output_file):
-    str_name_output_file = input('Output file:' + str_prefix_output_file)
-str_path_output_file = str_prefix_output_file + str_name_output_file
+str_path_output_file = ask_output_file('outputfiles/ipinfo/')
 
 # 1= console input
 if choice is 1:

@@ -1,10 +1,10 @@
+#!/usr/bin/env python3
 import censys.ipv4
 import configparser
 import json
 import socket
 import sys
-from base import censys_get_user_input
-
+from censysobject import CensysObject
 HOST = 'localhost'
 PORT = 5041
 config = configparser.ConfigParser()
@@ -14,7 +14,8 @@ CENSYS_API_KEY = (config['SectionOne']['CENSYS_API_KEY'])
 nrOfResults = 0
 nrOfResultsSent = 0
 
-chosen_query = censys_get_user_input()
+censys_object = CensysObject()
+chosen_query = censys_object.non_sql_get_user_input(censys_object)
 
 c = censys.ipv4.CensysIPv4(api_id=CENSYS_API_ID, api_secret=CENSYS_API_KEY)
 for record in c.search(chosen_query):

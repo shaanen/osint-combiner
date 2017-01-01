@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import socket
 
 # For testing the messages sent by other scripts
