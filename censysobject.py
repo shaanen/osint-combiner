@@ -2,6 +2,9 @@ import configparser
 import censys.export
 import censys.query
 from base import dict_add_source_prefix
+from base import dict_clean_empty
+import requests
+import json
 import re
 
 
@@ -26,6 +29,15 @@ class CensysObject:
             if splitted_number != 'test':
                 numbers.add(splitted_number)
         return max(numbers)
+
+    @staticmethod
+    def get_input_choice(self):
+        """Returns input_choice represented as integer"""
+        items = {'1': 'CIDR', '2': 'ASN', '3': 'CIDR file'}
+        input_choice = '0'
+        while input_choice not in items:
+            input_choice = input("Input: CIDR [1], ASN [2], or CIDR file[3]?")
+        return int(input_choice)
 
     @staticmethod
     def get_user_input_asn(self):
@@ -56,6 +68,51 @@ class CensysObject:
     @staticmethod
     def get_user_input(self):
         """TODO: SQL choice"""
+
+    @staticmethod
+    def prepare_ip_or_cidr_query(self, cidr):
+        """Return Censys SQL query string for given CIDR"""
+        print('Preparing Censys query for ' + str(cidr) + ', total: ' + str(cidr.size))
+        latest_table = self.get_latest_ipv4_tables(self)
+        # 1 IP query
+        if cidr.size is 1:
+            return 'select * from ipv4.' + str(latest_table) + ' where ip = "' + str(cidr.network) + '"'
+        # CIDR query
+        else:
+            start = cidr.network
+            end = cidr.broadcast
+            return 'select * from ipv4.' + str(latest_table) + ' where ipint BETWEEN ' + str(int(start)) + ' AND ' + str(int(end))
+
+    @staticmethod
+    def prepare_asn_query(self, asn):
+        """Return Censys SQL query string for given CIDR"""
+        latest_table = self.get_latest_ipv4_tables(self)
+        print('Preparing Censys query for ASN ' + str(asn))
+        return 'select * from ipv4.' + str(latest_table) + ' where autonomous_system.asn = ' + str(asn)
+
+    @staticmethod
+    def to_file(self, query, str_path_output_file):
+        """Makes Censys Export request with given query, converts results and writes to output file"""
+        print("Executing query: " + query)
+
+        # Start new Job
+        res = self.api.new_job(query)
+        job_id = res["job_id"]
+        result = self.api.check_job_loop(job_id)
+
+        if result['status'] == 'success':
+            print(result)
+            for path in result['download_paths']:
+                response = requests.get(path)
+                data = response.text
+                with open(str_path_output_file, 'a') as output_file:
+                    # TODO: FIX JSON READ BUG
+                    banner = dict_clean_empty(json.loads(data))
+                    banner = self.to_es_convert(self, banner)
+                    output_file.write(json.dumps(banner) + '\n')
+                    print("Appended query results to", str_path_output_file)
+        else:
+            print('Censys job failed.' + '\n' + str(result))
 
     @staticmethod
     def to_es_convert(self, input_dict):
