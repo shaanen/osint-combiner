@@ -16,16 +16,16 @@ ES_IP = (config['SectionOne']['ELASTICSEARCH_IP'])
 nrOfResults = 0
 
 
-def es_get_distinct_ips(str_existing_index):
-    """Returns set of IPs stored in given Elasticsearch index"""
-    list_output = []
+def es_get_all_ips(str_existing_index):
+    """Returns list of list_of_ips stored in given Elasticsearch index"""
+    list_ips = []
     es = Elasticsearch(([{'host': ES_IP}]))
     count = es.count(index=str_existing_index)['count']
     res = es.search(index=str_existing_index,
-                    body={"size": 0, "aggs": {"distinct_ip": {"terms": {"field": "ip", "size": count}}}})
-    for key in res['aggregations']['distinct_ip']['buckets']:
-        list_output.append(key['key'])
-    return list_output
+                    body={"size": 0, "aggs": {"all_ip": {"terms": {"field": "ip", "size": count}}}})
+    for key in res['aggregations']['all_ip']['buckets']:
+        list_ips.append(key['key'])
+    return list_ips
 
 
 def exists_es_index(str_valid_index):
@@ -43,7 +43,7 @@ def exists_es_index(str_valid_index):
 
 
 def get_cidr_from_user_input():
-    """Parses one CIDR from user input"""
+    """Parses one CIDR from user input and returns IPNetwork"""
     ip_or_cidr = '0'
     while not isinstance(ip_or_cidr, IPNetwork):
         try:
@@ -54,7 +54,7 @@ def get_cidr_from_user_input():
 
 
 def parse_all_cidrs_from_file(file_path):
-    """Returns set of CIDRs from given file"""
+    """Returns set of CIDR strings from given file"""
     output = set()
     while not output:
         with open(file_path) as f:

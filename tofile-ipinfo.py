@@ -10,7 +10,7 @@ import queue
 from ipinfoobject import IpInfoObject
 from base import get_cidr_from_user_input
 from base import parse_all_cidrs_from_file
-from base import es_get_distinct_ips
+from base import es_get_all_ips
 from base import is_valid_es_index_name
 from base import exists_es_index
 from base import ask_output_file
@@ -72,15 +72,26 @@ class GetIpInfoThread (threading.Thread):
 
 
 def cidr_to_ipinfo(cidr_input, path_output_file):
-    """Makes ipinfo request for every given IP or CIDR and writes to given file"""
+    """Makes ipinfo request for every given IP or CIDR and writes to given file
+
+    cidr_input -- A list of Strings or an IPNetwork
+    """
     global exitFlag
     nr_threads = 0
-    if cidr_input.size < 16:
-        nr_threads = cidr_input.size
-    else:
-        nr_threads = 16
     if type(cidr_input) is IPNetwork:
-        print('CIDR ' + str(cidr_input) + ' (' + str(cidr_input.size) + ' total)')
+        if cidr_input.size < 16:
+            nr_threads = cidr_input.size
+        else:
+            nr_threads = 16
+        if type(cidr_input) is IPNetwork:
+            print('CIDR ' + str(cidr_input) + ' (' + str(cidr_input.size) + ' total)')
+    else:
+        if len(cidr_input) < 16:
+            nr_threads = cidr_input.size
+        else:
+            nr_threads = 16
+        if type(cidr_input) is IPNetwork:
+            print('list_of_ips (' + str(cidr_input.size) + ' total)')
     start_time = time.time()
 
     for num in range(1, nr_threads + 1):
@@ -128,7 +139,7 @@ str_path_output_file = ask_output_file('outputfiles/ipinfo/')
 
 # 1= console input
 if choice is 1:
-    cidr_to_ipinfo(IPNetwork(get_cidr_from_user_input()), str_path_output_file)
+    cidr_to_ipinfo(get_cidr_from_user_input(), str_path_output_file)
 # 2= CIDR file input
 elif choice is 2:
     input_file_path = ''
@@ -136,9 +147,18 @@ elif choice is 2:
         input_file_path = input('Input file:')
     cidrs = parse_all_cidrs_from_file(input_file_path)
     print(cidrs, sep='\n')
+    all_cidrs_are_just_one_ip = True
     for cidr in cidrs:
-        print('--Starting with CIDR: ' + cidr + ' (' + (str(cidrs.index(cidr) + 1)) + '/' + str(len(cidrs)) + ')--')
-        cidr_to_ipinfo(IPNetwork(cidr), str_path_output_file)
+        if IPNetwork(cidr).size is not 1:
+            all_cidrs_are_just_one_ip = False
+    # list of only single IPs
+    if all_cidrs_are_just_one_ip:
+        cidr_to_ipinfo(cidrs, str_path_output_file)
+    # list contains 1 or more CIDRS
+    else:
+        for cidr in cidrs:
+            print('--Starting with CIDR: ' + cidr + ' (' + (str(cidrs.index(cidr) + 1)) + '/' + str(len(cidrs)) + ')--')
+            cidr_to_ipinfo(IPNetwork(cidr), str_path_output_file)
 # 3= Elasticsearch Input
 elif choice is 3:
     str_input_es_index = ''
@@ -151,5 +171,5 @@ elif choice is 3:
             index_exists = True
         else:
             print('Index does not exist')
-    IPs = es_get_distinct_ips(str_input_es_index)
-    cidr_to_ipinfo(IPs, str_path_output_file)
+    list_of_ips = es_get_all_ips(str_input_es_index)
+    cidr_to_ipinfo(list_of_ips, str_path_output_file)

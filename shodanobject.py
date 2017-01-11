@@ -41,16 +41,22 @@ class ShodanObject:
         del input_dict['_shodan']
 
         # asn to int
-        input_dict['asn'] = int((input_dict['asn'])[2:])
-        # rename location.country_name to location.country
-        input_dict['location']['country'] = input_dict['location']['country_name']
-        del input_dict['location']['country_name']
-        # rename latitude and longitude for geoip
-        input_dict['location']['geo'] = {}
-        input_dict['location']['geo']['lat'] = input_dict['location']['latitude']
-        input_dict['location']['geo']['lon'] = input_dict['location']['longitude']
-        del input_dict['location']['latitude']
-        del input_dict['location']['longitude']
+        try:
+            input_dict['asn'] = int((input_dict['asn'])[2:])
+        except KeyError:
+            pass
+        try:
+            # rename location.country_name to location.country
+            input_dict['location']['country'] = input_dict['location']['country_name']
+            del input_dict['location']['country_name']
+            # rename latitude and longitude for geoip
+            input_dict['location']['geo'] = {}
+            input_dict['location']['geo']['lat'] = input_dict['location']['latitude']
+            input_dict['location']['geo']['lon'] = input_dict['location']['longitude']
+            del input_dict['location']['latitude']
+            del input_dict['location']['longitude']
+        except KeyError:
+            pass
 
         # prefix non-nested fields with 'shodan'
         input_dict = dict_add_source_prefix(input_dict, 'shodan', str(input_dict['protocols']))
