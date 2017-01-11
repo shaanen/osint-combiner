@@ -83,17 +83,15 @@ def cidr_to_ipinfo(cidr_input, path_output_file):
             nr_threads = cidr_input.size
         else:
             nr_threads = 16
-        if type(cidr_input) is IPNetwork:
-            print('CIDR ' + str(cidr_input) + ' (' + str(cidr_input.size) + ' total)')
+        print('CIDR ' + str(cidr_input) + ' (' + str(cidr_input.size) + ' total)')
     else:
         if len(cidr_input) < 16:
             nr_threads = cidr_input.size
         else:
             nr_threads = 16
-        if type(cidr_input) is IPNetwork:
-            print('list_of_ips (' + str(cidr_input.size) + ' total)')
-    start_time = time.time()
+        print('List of IPs (' + str(len(cidr_input)) + ' total)')
 
+    start_time = time.time()
     for num in range(1, nr_threads + 1):
         thread = GetIpInfoThread(workQueue)
         thread.start()
