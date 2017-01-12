@@ -6,6 +6,7 @@ import re
 import string
 import sys
 from pathlib import Path
+import json
 
 config = configparser.ConfigParser()
 config.read("config.ini")
@@ -84,7 +85,7 @@ def dict_add_source_prefix(obj, source_str, shodan_protocol_str=''):
     keys_not_source_prefixed = ['ip', 'asn', 'ip_int']
     # These will still have the source prefixed
     shodan_keys_not_port_prefixed = ['asn', 'data', 'ip', 'ipv6 port', 'hostnames', 'domains', 'location',
-                              'location.area_code', 'location.city', 'location.country_code', 'location.country_code3',
+                                'location.area_code', 'location.city', 'location.country_code', 'location.country_code3',
                               'location.country_name', 'location.dma_code', 'location.latitude', 'location.longitude',
                               'location.postal_code', 'location.region_code', 'opts', 'org', 'isp', 'os', 'transport',
                               'protocols']
@@ -109,7 +110,7 @@ def dict_add_source_prefix(obj, source_str, shodan_protocol_str=''):
 
 
 def print_json_tree(df, indent='  '):
-    """Prints tree structure of given dict for debug purposes"""
+    """Prints tree structure of given dict for test/debug purposes"""
     for key in df.keys():
         print(indent+str(key))
         if isinstance(df[key], dict):
@@ -141,6 +142,23 @@ def ask_output_file(str_prefix_output_file):
     while not is_valid_file_name(str_name_output_file):
         str_name_output_file = input('Output file:' + str_prefix_output_file)
     return str_prefix_output_file + str_name_output_file
+
+
+class ConcatJSONDecoder(json.JSONDecoder):
+    """Returns list of dicts from given string containing multiple root JSON objects"""
+    # shameless copy paste from element/decoder.py
+    FLAGS = re.VERBOSE | re.MULTILINE | re.DOTALL
+    WHITESPACE = re.compile(r'[ \t\n\r]*', FLAGS)
+
+    def decode(self, s, _w=WHITESPACE.match):
+        s_len = len(s)
+        objs = []
+        end = 0
+        while end != s_len:
+            obj, end = self.raw_decode(s, idx=_w(s, end).end())
+            end = _w(s, end).end()
+            objs.append(obj)
+        return objs
 
 
 

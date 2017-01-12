@@ -3,6 +3,7 @@ import censys.export
 import censys.query
 from base import dict_add_source_prefix
 from base import dict_clean_empty
+from base import ConcatJSONDecoder
 import requests
 import json
 import re
@@ -101,16 +102,17 @@ class CensysObject:
         result = self.api.check_job_loop(job_id)
 
         if result['status'] == 'success':
-            print(result)
+            total_results = 0
             for path in result['download_paths']:
                 response = requests.get(path)
-                data = response.text
+                list_of_json = json.loads(response.content.decode('utf-8'), cls=ConcatJSONDecoder)
                 with open(str_path_output_file, 'a') as output_file:
-                    # TODO: FIX JSON READ BUG
-                    banner = dict_clean_empty(json.loads(data))
-                    banner = self.to_es_convert(self, banner)
-                    output_file.write(json.dumps(banner) + '\n')
-                    print("Appended query results to", str_path_output_file)
+                    for result in list_of_json:
+                        result = dict_clean_empty(result)
+                        result = self.to_es_convert(self, result)
+                        output_file.write(json.dumps(result) + '\n')
+                total_results += len(list_of_json)
+            print('Appended ' + str(total_results) + ' query results to ', str_path_output_file)
         else:
             print('Censys job failed.' + '\n' + str(result))
 

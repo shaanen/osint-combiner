@@ -15,9 +15,9 @@ class IpInfoObject:
             pass
         try:
             input_dict['location']['country_code'] = input_dict['geo']['country']['iso_code']
+            del input_dict['geo']['country']
         except KeyError:
             pass
-        del input_dict['geo']['country']
         try:
             input_dict['location']['city'] = input_dict['geo']['city']
         except KeyError:
@@ -28,9 +28,9 @@ class IpInfoObject:
             input_dict['location']['geo'] = {}
             input_dict['location']['geo']['lat'] = input_dict['geo']['location']['latitude']
             input_dict['location']['geo']['lon'] = input_dict['geo']['location']['longitude']
+            del input_dict['geo']['location']
         except KeyError:
             pass
-        del input_dict['geo']['location']
         try:
             if not input_dict['geo']:
                 del input_dict['geo']
