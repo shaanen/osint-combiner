@@ -34,10 +34,10 @@ class CensysObject:
     @staticmethod
     def get_input_choice(self):
         """Returns input_choice represented as integer"""
-        items = {'1': 'CIDR', '2': 'ASN', '3': 'CIDR file'}
+        items = {'1': 'CIDR', '2': 'ASN', '3': 'CIDR file', '4': 'Custom WHERE query'}
         input_choice = '0'
         while input_choice not in items:
-            input_choice = input("Input: CIDR [1], ASN [2], or CIDR file[3]?")
+            input_choice = input("Input: CIDR [1], ASN [2],CIDR file[3] or custom query[4]?")
         return int(input_choice)
 
     @staticmethod
@@ -56,7 +56,7 @@ class CensysObject:
 
     @staticmethod
     def non_sql_get_user_input(self):
-        """Returns (non-SQL) Censys query from user input"""
+        """Returns Censys (non-SQL) query from user input"""
         items = {'2': 'autonomous_system.asn: 1101', '3': 'custom query'}
         choice = '0'
         while choice not in items:
@@ -67,8 +67,12 @@ class CensysObject:
         return chosen_query
 
     @staticmethod
-    def get_user_input(self):
-        """TODO: SQL choice"""
+    def sql_get_custom_query_from_user(self):
+        """Returns Censys SQL query from user input (the part after 'WHERE')"""
+        chosen_query = ''
+        while chosen_query is '':
+            chosen_query = input("select * from ipv4.[latest] where ")
+        return chosen_query
 
     @staticmethod
     def prepare_ip_or_cidr_query(self, cidr):
@@ -90,6 +94,12 @@ class CensysObject:
         latest_table = self.get_latest_ipv4_tables(self)
         print('Preparing Censys query for ASN ' + str(asn))
         return 'select * from ipv4.' + str(latest_table) + ' where autonomous_system.asn = ' + str(asn)
+
+    @staticmethod
+    def prepare_custom_query(self, query_part_after_where):
+        """Return Censys SQL custom query string for given string"""
+        latest_table = self.get_latest_ipv4_tables(self)
+        return 'select * from ipv4.' + str(latest_table) + ' where ' + str(query_part_after_where)
 
     @staticmethod
     def to_file(self, query, str_path_output_file):

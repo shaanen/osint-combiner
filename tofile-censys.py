@@ -27,3 +27,9 @@ elif choice is 3:
     for cidr in set_cidrs:
         query = censys.prepare_ip_or_cidr_query(censys, IPNetwork(cidr))
         censys.to_file(censys, query, str_path_output_file)
+# 4= Custom WHERE query
+elif choice is 4:
+    query = censys.prepare_custom_query(censys, censys.sql_get_custom_query_from_user(censys))
+    censys.to_file(censys, query, str_path_output_file)
+
+

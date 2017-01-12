@@ -107,7 +107,7 @@ class ShodanObject:
         queries = set()
         done = False
         while not done:
-            items = {'1': 'blablablabla', '2': 'asn:AS1101', '3': 'custom query', '4': 'done'}
+            items = {'1': 'blablablabla', '2': 'asn:AS1104', '3': 'custom query', '4': 'done'}
             choice = '0'
             while choice not in items:
                 choice = input("Choose query: (1='blablablabla' 2='asn:AS1101' 3='custom query'). 4=done")
