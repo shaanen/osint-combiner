@@ -14,7 +14,9 @@ Currently supported OSINT sources:
 
 ## Requirements
 
-Project needs a text file named "config.ini" with the following content:
++ A [Shodan.io](https://www.shodan.io/ "Shodan's Homepage") key for API access and scan credits
++ A [Censys.io](https://censys.io/ "Censys' Homepage") ID and KEY with [SQL and Export privileges](https://censys.io/contact "Censys' Contact page") 
++ Project needs a text file named "config.ini" with the following content:
 
 ```
 [SectionOne]
@@ -28,8 +30,8 @@ CENSYS_API_ID: *{Censys API ID here}*
 CENSYS_API_KEY: *{Censys Secret here}*
 ```
 
-The Python3 scripts need the following modules (can be installed with easy_install3 or pip3): 
-+ Shodan
-+ Censys
-+ Elasticsearch
-+ Netaddr
++ The Python3 scripts need the following modules (can be installed with easy_install3 or pip3): 
+  + Shodan
+  + Censys
+  + Elasticsearch
+  + Netaddr
