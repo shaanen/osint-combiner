@@ -3,6 +3,7 @@ import configparser
 import json
 from base import dict_add_source_prefix
 from base import dict_clean_empty
+import sys
 
 
 class ShodanObject:
@@ -17,13 +18,17 @@ class ShodanObject:
     @staticmethod
     def to_es_convert(self, input_dict):
         """Return dict ready to be sent to Logstash."""
-
-        # set ip and ip_int
-        ip_int = input_dict['ip']
-        del input_dict['ip']
-        input_dict['ip'] = input_dict['ip_str']
-        input_dict['ip_int'] = ip_int
-        del input_dict['ip_str']
+        try:
+            # set ip and ip_int
+            ip_int = input_dict['ip']
+            del input_dict['ip']
+            input_dict['ip'] = input_dict['ip_str']
+            input_dict['ip_int'] = ip_int
+            del input_dict['ip_str']
+        except KeyError:
+            print(input_dict)
+            print('Missing required IP field here. Exiting now...')
+            sys.exit(1)
 
         # if present, convert ssl.cert.serial to string
         try:
@@ -35,10 +40,14 @@ class ShodanObject:
             input_dict['ssl']['dhparams']['generator'] = str(input_dict['ssl']['dhparams']['generator'])
         except (KeyError, TypeError):
             pass
-        # rename_shodan.modules to protocols (used as prefix per Shodan banner for combining multiple banners into 1 IP)
-        input_dict['protocols'] = input_dict['_shodan']['module']
-        # the rest of the data in _shodan is irrelevant
-        del input_dict['_shodan']
+
+        try:
+            # rename_shodan.modules to protocols (used as prefix per banner for combining multiple banners into 1 IP)
+            input_dict['protocols'] = input_dict['_shodan']['module']
+            # the rest of the data in _shodan is irrelevant
+            del input_dict['_shodan']
+        except KeyError:
+            pass
 
         # asn to int
         try:
@@ -103,21 +112,18 @@ class ShodanObject:
 
     # Returns a non empty set of query strings
     @staticmethod
-    def get_user_input_queries():
+    def get_user_input_console_queries():
         queries = set()
         done = False
+        print('Enter Shodan queries, one at a time. Enter \'4\' when done.')
         while not done:
-            items = {'1': 'blablablabla', '2': 'asn:AS1104', '3': 'custom query', '4': 'done'}
-            choice = '0'
-            while choice not in items:
-                choice = input("Choose query: (1='blablablabla' 2='asn:AS1101' 3='custom query'). 4=done")
-            chosen_query = items[choice]
-            if chosen_query is items['3']:
-                chosen_query = input("Enter Query: ")
-            elif chosen_query is items['4']:
-                if queries != set():
-                    done = True
-            if chosen_query is not items['4']:
-                queries.add(chosen_query)
+                query = ''
+                while query is '':
+                    query = input("Query:")
+                if query is '4':
+                    if queries != set():
+                        done = True
+                else:
+                    queries.add(query)
         return queries
 

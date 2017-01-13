@@ -10,12 +10,12 @@ censys = CensysObject()
 str_path_output_file = ask_output_file('outputfiles/censys/')
 choice = censys.get_input_choice(censys)
 
-# 1= CIDR input
+# 1=Console CIDR input
 if choice is 1:
     cidr = get_cidr_from_user_input()
     query = censys.prepare_ip_or_cidr_query(censys, cidr)
     censys.to_file(censys, query, str_path_output_file)
-# 2= ASN input
+# 2=Console ASN input
 elif choice is 2:
     asn = censys.get_user_input_asn(censys)
     query = censys.prepare_asn_query(censys, asn)
@@ -27,7 +27,7 @@ elif choice is 3:
     for cidr in set_cidrs:
         query = censys.prepare_ip_or_cidr_query(censys, IPNetwork(cidr))
         censys.to_file(censys, query, str_path_output_file)
-# 4= Custom WHERE query
+# 4=Console Custom WHERE query
 elif choice is 4:
     query = censys.prepare_custom_query(censys, censys.sql_get_custom_query_from_user(censys))
     censys.to_file(censys, query, str_path_output_file)

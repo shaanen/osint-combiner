@@ -135,7 +135,7 @@ ipinfo = IpInfoObject()
 choice = ipinfo.get_input_choice(ipinfo)
 str_path_output_file = ask_output_file('outputfiles/ipinfo/')
 
-# 1= console input
+# 1= console CIDR input
 if choice is 1:
     cidr_to_ipinfo(get_cidr_from_user_input(), str_path_output_file)
 # 2= CIDR file input

@@ -1,7 +1,7 @@
 from elasticsearch import Elasticsearch
 from elasticsearch import exceptions
 import configparser
-from netaddr import IPNetwork
+from netaddr import IPNetwork, AddrFormatError
 import re
 import string
 import sys
@@ -26,6 +26,8 @@ def es_get_all_ips(str_existing_index):
                     body={"size": 0, "aggs": {"all_ip": {"terms": {"field": "ip", "size": count}}}})
     for key in res['aggregations']['all_ip']['buckets']:
         list_ips.append(key['key'])
+    print('Found ' + str(len(list_ips)) + ' IPs in Elasticsearch index ' + str_existing_index)
+    ask_continue()
     return list_ips
 
 
@@ -49,7 +51,7 @@ def get_cidr_from_user_input():
     while not isinstance(ip_or_cidr, IPNetwork):
         try:
             ip_or_cidr = IPNetwork(input('IP/CIDR: '))
-        except:
+        except AddrFormatError:
             print('Not a valid IP/CIDR.')
     return ip_or_cidr
 
@@ -59,8 +61,10 @@ def parse_all_cidrs_from_file(file_path):
     output = set()
     while not output:
         with open(file_path) as f:
-            output = re.findall('(?:\d{1,3}\.){3}\d{1,3}(?:/\d\d?)?', f.read())
-            print('CIDRs in file: ' + str(len(output)))
+            output = set(re.findall('(?:\d{1,3}\.){3}\d{1,3}(?:/\d\d?)?', f.read()))
+            print('CIDRs Found:' + str(output))
+            print('Total CIDRs in file: ' + str(len(output)))
+            ask_continue()
     return output
 
 
@@ -144,6 +148,11 @@ def ask_output_file(str_prefix_output_file):
     return str_prefix_output_file + str_name_output_file
 
 
+def ask_continue():
+    if (input('Continue? y/n')) is 'n':
+        sys.exit(0)
+
+
 class ConcatJSONDecoder(json.JSONDecoder):
     """Returns list of dicts from given string containing multiple root JSON objects"""
     # shameless copy paste from element/decoder.py
@@ -159,6 +168,7 @@ class ConcatJSONDecoder(json.JSONDecoder):
             end = _w(s, end).end()
             objs.append(obj)
         return objs
+
 
 
 

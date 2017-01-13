@@ -7,6 +7,7 @@ from base import ConcatJSONDecoder
 import requests
 import json
 import re
+import sys
 
 
 class CensysObject:
@@ -129,19 +130,29 @@ class CensysObject:
     @staticmethod
     def to_es_convert(self, input_dict):
         """Return dict ready to be sent to Logstash."""
-        # convert ip_int to ipint
-        input_dict['ip_int'] = input_dict['ipint']
-        del input_dict['ipint']
-        # convert autonomous_system.asn to asn
-        input_dict['asn'] = input_dict['autonomous_system']['asn']
-        del input_dict['autonomous_system']['asn']
-
-        # rename latitude and longitude for geoip
-        input_dict['location']['geo'] = {}
-        input_dict['location']['geo']['lat'] = input_dict['location']['latitude']
-        input_dict['location']['geo']['lon'] = input_dict['location']['longitude']
-        del input_dict['location']['latitude']
-        del input_dict['location']['longitude']
+        try:
+            # convert ip_int to ipint
+            input_dict['ip_int'] = input_dict['ipint']
+            del input_dict['ipint']
+        except KeyError:
+            print(input_dict)
+            print('Missing required IP field here. Exiting now...')
+            sys.exit(1)
+        try:
+            # convert autonomous_system.asn to asn
+            input_dict['asn'] = input_dict['autonomous_system']['asn']
+            del input_dict['autonomous_system']['asn']
+        except KeyError:
+            pass
+        try:
+            # rename latitude and longitude for geoip
+            input_dict['location']['geo'] = {}
+            input_dict['location']['geo']['lat'] = input_dict['location']['latitude']
+            input_dict['location']['geo']['lon'] = input_dict['location']['longitude']
+            del input_dict['location']['latitude']
+            del input_dict['location']['longitude']
+        except KeyError:
+            pass
 
         #  Remove 'p' from every protocol key
         pattern = re.compile("^p[0-9]{1,6}$")
