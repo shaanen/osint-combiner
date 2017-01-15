@@ -36,10 +36,10 @@ class CensysObject:
     @staticmethod
     def get_input_choice(self):
         """Returns input_choice represented as integer"""
-        items = {'1': 'CIDR', '2': 'ASN', '3': 'CIDR file', '4': 'Custom WHERE query'}
+        items = {'1': 'CIDR', '2': 'ASN', '3': 'CIDR file', '4': 'Custom WHERE query', '5': 'CSV file input'}
         input_choice = '0'
         while input_choice not in items:
-            input_choice = input("Input: CIDR [1], ASN [2],CIDR file[3] or custom query[4]?")
+            input_choice = input("Input: CIDR [1], ASN [2],CIDR file[3], custom query[4], or csv file input[5]??")
         return int(input_choice)
 
     @staticmethod

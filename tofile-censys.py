@@ -37,6 +37,7 @@ elif choice is 4:
     query = censys.prepare_custom_query(censys, censys.sql_get_custom_query_from_user(censys))
     censys.to_file(censys, query, str_path_output_file, should_convert)
 # 5= CSV file input
+elif choice is 5:
     input_file_path = ''
     while not os.path.isfile(input_file_path):
         input_file_path = input('Input CSV file:')

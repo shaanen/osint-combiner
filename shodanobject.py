@@ -109,7 +109,7 @@ class ShodanObject:
         items = {'1': 'console_input', '2': 'cidr_file_input', '3': 'csv_file_input'}
         input_choice = '0'
         while input_choice not in items:
-            input_choice = input("Console input[1], CIDR file input[2], csv file input[3]?")
+            input_choice = input("Console input[1], CIDR file input[2] or csv file input[3]?")
         return int(input_choice)
 
     # Returns a non empty set of query strings
