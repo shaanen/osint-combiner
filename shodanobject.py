@@ -72,11 +72,12 @@ class ShodanObject:
         return input_dict
 
     @staticmethod
-    def to_file_shodan(self, queries, path_output_file):
+    def to_file_shodan(self, queries, path_output_file, should_convert):
         """Makes a Shodan API call with each given query and writes results to output file
         :param self: ShodanObject
         :param queries: Collection of strings which present Shodan queries
         :param path_output_file: String which points to existing output file
+        :param should_convert: Boolean if results should be converted
         """
         nr_total_results = 0
         failed_queries = set()
@@ -85,7 +86,8 @@ class ShodanObject:
             try:
                 for banner in self.api.search_cursor(query):
                     banner = dict_clean_empty(banner)
-                    self.to_es_convert(self, banner)
+                    if should_convert:
+                        self.to_es_convert(self, banner)
                     results.append(json.dumps(banner) + '\n')
                     print('\r' + str(len(results)) + ' results fetched...', end='')
             except shodan.APIError as e:
@@ -104,10 +106,10 @@ class ShodanObject:
     @staticmethod
     def get_input_choice(self):
         """Returns input_choice represented as integer"""
-        items = {'1': 'console_input', '2': 'cidr_file_input'}
+        items = {'1': 'console_input', '2': 'cidr_file_input', '3': 'csv_file_input'}
         input_choice = '0'
         while input_choice not in items:
-            input_choice = input("Console input[1] or CIDR file input[2]?")
+            input_choice = input("Console input[1], CIDR file input[2], csv file input[3]?")
         return int(input_choice)
 
     # Returns a non empty set of query strings

@@ -7,6 +7,7 @@ import string
 import sys
 from pathlib import Path
 import json
+from collections import defaultdict
 
 config = configparser.ConfigParser()
 config.read("config.ini")
@@ -148,9 +149,14 @@ def ask_output_file(str_prefix_output_file):
     return str_prefix_output_file + str_name_output_file
 
 
-def ask_continue():
-    if (input('Continue? y/n')) is 'n':
-        sys.exit(0)
+def get_organizations_from_csv(str_path_csv_file):
+    """Returns defaultdict containing organizations with CIDRS from given CSV file"""
+    list_organizations = defaultdict(list)
+    f = open(str_path_csv_file, 'r')
+    for line in f:
+        line = line.split(',')
+        list_organizations[line[0]].append(line[1])
+    return list_organizations
 
 
 class ConcatJSONDecoder(json.JSONDecoder):
@@ -168,6 +174,23 @@ class ConcatJSONDecoder(json.JSONDecoder):
             end = _w(s, end).end()
             objs.append(obj)
         return objs
+
+
+def ask_continue():
+    """Asks user if script should continue or stop immediately"""
+    if get_user_boolean('Continue? y/n') is False:
+        sys.exit(0)
+
+
+def get_user_boolean(text):
+    """Returns boolean from user input. Accepts only y (True) or n (False)"""
+    while True:
+        str_should_convert = input(text)
+        if str_should_convert is 'y':
+            return True
+        elif str_should_convert is 'n':
+            return False
+
 
 
 

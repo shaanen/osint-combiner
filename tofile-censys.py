@@ -4,32 +4,35 @@ from base import get_cidr_from_user_input
 from base import ask_output_file
 from base import ask_input_file
 from base import parse_all_cidrs_from_file
+from base import get_user_boolean
 from netaddr import IPNetwork
 
 censys = CensysObject()
 str_path_output_file = ask_output_file('outputfiles/censys/')
 choice = censys.get_input_choice(censys)
+should_convert = get_user_boolean('Also convert to es? y/n')
 
 # 1=Console CIDR input
 if choice is 1:
     cidr = get_cidr_from_user_input()
     query = censys.prepare_ip_or_cidr_query(censys, cidr)
-    censys.to_file(censys, query, str_path_output_file)
+    censys.to_file(censys, query, str_path_output_file, should_convert)
 # 2=Console ASN input
 elif choice is 2:
     asn = censys.get_user_input_asn(censys)
     query = censys.prepare_asn_query(censys, asn)
-    censys.to_file(censys, query, str_path_output_file)
+    censys.to_file(censys, query, str_path_output_file, should_convert)
 # 3= CIDR file input
 elif choice is 3:
     input_file = ask_input_file()
     set_cidrs = parse_all_cidrs_from_file(str(input_file))
     for cidr in set_cidrs:
         query = censys.prepare_ip_or_cidr_query(censys, IPNetwork(cidr))
-        censys.to_file(censys, query, str_path_output_file)
+        censys.to_file(censys, query, str_path_output_file, should_convert)
 # 4=Console Custom WHERE query
 elif choice is 4:
     query = censys.prepare_custom_query(censys, censys.sql_get_custom_query_from_user(censys))
-    censys.to_file(censys, query, str_path_output_file)
+    censys.to_file(censys, query, str_path_output_file, should_convert)
+# TODO: CSV file input for Censys
 
 

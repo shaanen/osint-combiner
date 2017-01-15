@@ -103,8 +103,13 @@ class CensysObject:
         return 'select * from ipv4.' + str(latest_table) + ' where ' + str(query_part_after_where)
 
     @staticmethod
-    def to_file(self, query, str_path_output_file):
-        """Makes Censys Export request with given query, converts results and writes to output file"""
+    def to_file(self, query, str_path_output_file, should_convert):
+        """Makes Censys Export request with given query, converts results and writes to output file
+        :param self: CensysObject
+        :param query: Strings which presents Censys SQL queries
+        :param str_path_output_file: String which points to existing output file
+        :param should_convert: Boolean if results should be converted
+        """
         print("Executing query: " + query)
 
         # Start new Job
@@ -120,7 +125,8 @@ class CensysObject:
                 with open(str_path_output_file, 'a') as output_file:
                     for result in list_of_json:
                         result = dict_clean_empty(result)
-                        result = self.to_es_convert(self, result)
+                        if should_convert:
+                            result = self.to_es_convert(self, result)
                         output_file.write(json.dumps(result) + '\n')
                 total_results += len(list_of_json)
             print('Appended ' + str(total_results) + ' query results to ', str_path_output_file)

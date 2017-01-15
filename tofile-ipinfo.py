@@ -15,6 +15,7 @@ from base import is_valid_es_index_name
 from base import exists_es_index
 from base import ask_output_file
 from base import dict_clean_empty
+from base import get_user_boolean
 
 url = 'http://ipinfo.dutchsec.nl/submit'
 headers = {'Content-Type': 'text/plain', 'Accept': 'text/json'}
@@ -71,7 +72,7 @@ class GetIpInfoThread (threading.Thread):
             time.sleep(1)
 
 
-def cidr_to_ipinfo(cidr_input, path_output_file):
+def cidr_to_ipinfo(cidr_input, path_output_file, should_be_converted):
     """Makes ipinfo request for every given IP or CIDR and writes to given file
 
     cidr_input -- A list of Strings or an IPNetwork
@@ -127,17 +128,19 @@ def cidr_to_ipinfo(cidr_input, path_output_file):
         # Remove empty elements, convert and write to output file
         for str_banner in result_list:
             banner = dict_clean_empty(json.loads(str_banner))
-            ipinfo.to_es_convert(ipinfo, banner)
+            if should_be_converted:
+                banner = ipinfo.to_es_convert(ipinfo, banner)
             output_file.write(json.dumps(banner) + '\n')
     print('\r' + str(len(result_list)) + ' results written in ' + path_output_file, end='')
 
 ipinfo = IpInfoObject()
 choice = ipinfo.get_input_choice(ipinfo)
+should_convert = get_user_boolean('Also convert to es? y/n')
 str_path_output_file = ask_output_file('outputfiles/ipinfo/')
 
 # 1= console CIDR input
 if choice is 1:
-    cidr_to_ipinfo(get_cidr_from_user_input(), str_path_output_file)
+    cidr_to_ipinfo(get_cidr_from_user_input(), str_path_output_file, should_convert)
 # 2= CIDR file input
 elif choice is 2:
     input_file_path = ''
@@ -151,12 +154,12 @@ elif choice is 2:
             all_cidrs_are_just_one_ip = False
     # list of only single IPs
     if all_cidrs_are_just_one_ip:
-        cidr_to_ipinfo(cidrs, str_path_output_file)
+        cidr_to_ipinfo(cidrs, str_path_output_file, should_convert)
     # list contains 1 or more CIDRS
     else:
         for cidr in cidrs:
             print('--Starting with CIDR: ' + cidr + ' (' + (str(cidrs.index(cidr) + 1)) + '/' + str(len(cidrs)) + ')--')
-            cidr_to_ipinfo(IPNetwork(cidr), str_path_output_file)
+            cidr_to_ipinfo(IPNetwork(cidr), str_path_output_file, should_convert)
 # 3= Elasticsearch Input
 elif choice is 3:
     str_input_es_index = ''
@@ -170,4 +173,4 @@ elif choice is 3:
         else:
             print('Index does not exist')
     list_of_ips = es_get_all_ips(str_input_es_index)
-    cidr_to_ipinfo(list_of_ips, str_path_output_file)
+    cidr_to_ipinfo(list_of_ips, str_path_output_file, should_convert)
