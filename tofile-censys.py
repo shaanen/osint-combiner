@@ -13,7 +13,7 @@ import os.path
 censys = CensysObject()
 choice = censys.get_input_choice(censys)
 str_path_output_file = ''
-if choice is 5:
+if choice is not 5:
     str_path_output_file = ask_output_file('outputfiles/censys/')
 should_convert = get_user_boolean('Also convert to es? y/n')
 
