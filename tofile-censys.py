@@ -11,8 +11,10 @@ from netaddr import IPNetwork
 import os.path
 
 censys = CensysObject()
-str_path_output_file = ask_output_file('outputfiles/censys/')
 choice = censys.get_input_choice(censys)
+str_path_output_file = ''
+if choice is 5:
+    str_path_output_file = ask_output_file('outputfiles/censys/')
 should_convert = get_user_boolean('Also convert to es? y/n')
 
 # 1=Console CIDR input
