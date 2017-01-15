@@ -5,7 +5,10 @@ from base import ask_output_file
 from base import ask_input_file
 from base import parse_all_cidrs_from_file
 from base import get_user_boolean
+from base import get_organizations_from_csv
+from base import ask_continue
 from netaddr import IPNetwork
+import os.path
 
 censys = CensysObject()
 str_path_output_file = ask_output_file('outputfiles/censys/')
@@ -33,6 +36,22 @@ elif choice is 3:
 elif choice is 4:
     query = censys.prepare_custom_query(censys, censys.sql_get_custom_query_from_user(censys))
     censys.to_file(censys, query, str_path_output_file, should_convert)
-# TODO: CSV file input for Censys
-
+# 5= CSV file input
+    input_file_path = ''
+    while not os.path.isfile(input_file_path):
+        input_file_path = input('Input CSV file:')
+    organizations = get_organizations_from_csv(input_file_path)
+    print(organizations.keys())
+    print(str(len(organizations)) + ' organizations found.')
+    ask_continue()
+    count = 0
+    for name, cidrs in organizations.items():
+        count += 1
+        print(name + ' [' + str(count) + '/' + str(len(organizations)) + ']...')
+        query = censys.prepare_ip_or_cidr_query(censys, cidrs)
+        if should_convert:
+            str_path_output_file = 'outputfiles/censys/censys-' + name + '-converted.json'
+        else:
+            str_path_output_file = 'outputfiles/censys/censys-' + name + '.json'
+        censys.to_file(censys, query, str_path_output_file, should_convert)
 

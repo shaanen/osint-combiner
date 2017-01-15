@@ -136,7 +136,7 @@ def ask_input_file():
     input_file = Path('')
     input_file_path = ''
     while not input_file.is_file():
-        input_file_path = input('Input file (with path from project root):')
+        input_file_path = input('Input file:')
         input_file = Path(input_file_path)
     return input_file
 

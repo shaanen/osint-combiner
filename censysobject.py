@@ -1,6 +1,7 @@
 import configparser
 import censys.export
 import censys.query
+from netaddr import IPNetwork
 from base import dict_add_source_prefix
 from base import dict_clean_empty
 from base import ConcatJSONDecoder
@@ -76,18 +77,35 @@ class CensysObject:
         return chosen_query
 
     @staticmethod
-    def prepare_ip_or_cidr_query(self, cidr):
-        """Return Censys SQL query string for given CIDR"""
-        print('Preparing Censys query for ' + str(cidr) + ', total: ' + str(cidr.size))
+    def prepare_ip_or_cidr_query(self, cidrs):
+        """Return Censys SQL query string for given CIDR or list of CIDRS"""
         latest_table = self.get_latest_ipv4_tables(self)
-        # 1 IP query
-        if cidr.size is 1:
-            return 'select * from ipv4.' + str(latest_table) + ' where ip = "' + str(cidr.network) + '"'
-        # CIDR query
+        query_builder = 'select * from ipv4.' + str(latest_table) + ' where '
+
+        # Just one CIDR
+        if type(cidrs) is IPNetwork:
+            print('Preparing Censys query for ' + str(cidrs) + ', total: ' + str(cidrs.size))
+            # 1 IP query
+            if cidrs.size is 1:
+                return query_builder + 'ip = "' + str(cidrs.network) + '"'
+            # CIDR query
+            else:
+                start = cidrs.network
+                end = cidrs.broadcast
+                return query_builder + 'ipint BETWEEN ' + str(int(start)) + ' AND ' + str(int(end))
+        # Multiple CIDRs
         else:
-            start = cidr.network
-            end = cidr.broadcast
-            return 'select * from ipv4.' + str(latest_table) + ' where ipint BETWEEN ' + str(int(start)) + ' AND ' + str(int(end))
+            first = True
+            for cidr in cidrs:
+                if first:
+                    first = False
+                else:
+                    query_builder += ' OR '
+                cidr = IPNetwork(cidr)
+                start = cidrs.network
+                end = cidrs.broadcast
+                query_builder += 'ipint BETWEEN ' + str(int(start)) + ' AND ' + str(int(end))
+            return query_builder
 
     @staticmethod
     def prepare_asn_query(self, asn):

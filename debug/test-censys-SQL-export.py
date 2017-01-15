@@ -12,6 +12,7 @@ nrOfResults = 0
 c = censys.export.CensysExport(api_id=CENSYS_API_ID, api_secret=CENSYS_API_KEY)
 censys_object = censysobject.CensysObject()
 query = "select * from ipv4." + censys_object.get_latest_ipv4_tables(censys_object) + " where ip = \"8.8.8.8\""
+# query = ''
 print("Executing query: " + query)
 
 # Start new Job
