@@ -102,8 +102,8 @@ class CensysObject:
                 else:
                     query_builder += ' OR '
                 cidr = IPNetwork(cidr)
-                start = cidrs.network
-                end = cidrs.broadcast
+                start = cidr.network
+                end = cidr.broadcast
                 query_builder += 'ipint BETWEEN ' + str(int(start)) + ' AND ' + str(int(end))
             return query_builder
 
