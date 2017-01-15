@@ -51,6 +51,7 @@ __pycache__/
 
 # files with specific IP ranges
 ipranges.csv
+csvfiles/
 
 # directory with CIDR files
 /cidrfiles/
