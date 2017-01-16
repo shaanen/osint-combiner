@@ -5,6 +5,7 @@ from netaddr import IPNetwork, AddrFormatError
 import re
 import string
 import sys
+import os
 from pathlib import Path
 import json
 from collections import defaultdict
@@ -141,6 +142,14 @@ def ask_input_file():
     return input_file
 
 
+def ask_input_directory():
+    """Return existing directory from user input"""
+    input_directory = ''
+    while not os.path.isdir(input_directory):
+        input_directory = input('Input directory:')
+    return input_directory
+
+
 def ask_output_file(str_prefix_output_file):
     """Return valid file path string from user input """
     str_name_output_file = ''
@@ -190,6 +199,34 @@ def get_user_boolean(text):
             return True
         elif str_should_convert is 'n':
             return False
+
+
+def get_option_from_user(question, list_str_options):
+    """Asks user input with given question, returns one of given options"""
+    answer = ''
+    while answer not in list_str_options:
+        answer = input(question)
+    return answer
+
+
+def create_output_directory(input_directory):
+    """Creates new directory and returns its path"""
+    output_directory = ''
+    increment = 0
+    done_creating_directory = False
+    while not done_creating_directory:
+        try:
+            if input_directory.endswith('/'):
+                output_directory = input_directory + 'converted'
+            else:
+                output_directory = input_directory + '/converted'
+            if increment is not 0:
+                output_directory += str(increment)
+            os.makedirs(output_directory, exist_ok=False)
+            done_creating_directory = True
+        except FileExistsError:
+            increment += 1
+    return output_directory
 
 
 
