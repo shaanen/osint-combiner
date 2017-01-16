@@ -9,6 +9,7 @@ import requests
 import json
 import re
 import sys
+import threading
 
 
 class CensysObject:
@@ -77,9 +78,10 @@ class CensysObject:
         return chosen_query
 
     @staticmethod
-    def prepare_ip_or_cidr_query(self, cidrs):
+    def prepare_ip_or_cidr_query(self, cidrs, latest_table=''):
         """Return Censys SQL query string for given CIDR or list of CIDRS"""
-        latest_table = self.get_latest_ipv4_tables(self)
+        if latest_table is '':
+            latest_table = self.get_latest_ipv4_tables(self)
         query_builder = 'select * from ipv4.' + str(latest_table) + ' where '
 
         # Just one CIDR
@@ -130,10 +132,16 @@ class CensysObject:
         """
         print("Executing query: " + query)
 
+        config = configparser.ConfigParser()
+        config.read("config.ini")
+        CENSYS_API_ID = (config['SectionOne']['CENSYS_API_ID'])
+        CENSYS_API_KEY = (config['SectionOne']['CENSYS_API_KEY'])
+        api = censys.export.CensysExport(api_id=CENSYS_API_ID, api_secret=CENSYS_API_KEY)
+
         # Start new Job
-        res = self.api.new_job(query)
+        res = api.new_job(query)
         job_id = res["job_id"]
-        result = self.api.check_job_loop(job_id)
+        result = api.check_job_loop(job_id)
 
         if result['status'] == 'success':
             total_results = 0
@@ -188,3 +196,5 @@ class CensysObject:
         # prefix non-nested fields with 'censys'
         input_dict = dict_add_source_prefix(input_dict, 'censys')
         return input_dict
+
+
