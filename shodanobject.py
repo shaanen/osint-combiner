@@ -23,12 +23,16 @@ class ShodanObject:
             ip_int = input_dict['ip']
             del input_dict['ip']
             input_dict['ip'] = input_dict['ip_str']
-            input_dict['ip_int'] = ip_int
             del input_dict['ip_str']
+            input_dict['ip_int'] = ip_int
         except KeyError:
-            print(input_dict)
-            print('Missing required IP field here. Exiting now...')
-            sys.exit(1)
+            try:
+                input_dict['ip'] = input_dict['ip_str']
+                del input_dict['ip_str']
+            except KeyError:
+                print(input_dict)
+                print('Missing required \'ip\' field in the element above. Exiting now...')
+                sys.exit(1)
 
         # if present, convert ssl.cert.serial to string
         try:
