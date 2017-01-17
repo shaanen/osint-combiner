@@ -229,6 +229,7 @@ def create_output_directory(input_directory):
     return output_directory
 
 
-
-
-
+def get_queries_per_line_from_file(str_path_input_file):
+    """Returns list of queries as string, without any blank lines"""
+    with open(str_path_input_file) as f_in:
+        return list(filter(None, (line.rstrip() for line in f_in)))
