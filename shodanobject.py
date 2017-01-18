@@ -70,6 +70,13 @@ class ShodanObject:
             del input_dict['location']['longitude']
         except KeyError:
             pass
+        # Convert the 'nodes' and it's nested fields to 1 string, otherwise Elasticsearch will make new fields
+        # for EVERY node ID.
+        try:
+            input_dict['shodan.http-simple-new.elastic']['nodes'] = str(
+                input_dict['shodan.http-simple-new.elastic']['nodes'])
+        except KeyError:
+            pass
 
         # prefix non-nested fields with 'shodan'
         input_dict = dict_add_source_prefix(input_dict, 'shodan', str(input_dict['protocols']))
