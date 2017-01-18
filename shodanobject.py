@@ -73,8 +73,8 @@ class ShodanObject:
         # Convert the 'nodes' and it's nested fields to 1 string, otherwise Elasticsearch will make new fields
         # for EVERY node ID.
         try:
-            input_dict['shodan.http-simple-new.elastic']['nodes'] = str(
-                input_dict['shodan.http-simple-new.elastic']['nodes'])
+            input_dict['elastic'] = str(
+                input_dict['elastic'])
         except KeyError:
             pass
 

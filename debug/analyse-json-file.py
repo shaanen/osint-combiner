@@ -6,13 +6,13 @@ from pathlib import Path
 
 total_count = 0
 present_count = 0
-input_file = Path('../outputfiles/ipinfo/ipinfo-mongodb-converted.json')
+input_file = Path('../outputfiles/shodan/test.json')
 for element in input_file.open():
     total_count += 1
     json_element = json.loads(element)
     try:
         # print JSON element(s), if present
-        print(str(json_element['ip']) + ' | ' + str(type(json_element['ipinfo.whois']['person']['last_modified'])))
+        print(str(json_element['ip']))
         present_count += 1
     except KeyError:
         pass
