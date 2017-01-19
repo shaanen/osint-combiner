@@ -52,7 +52,6 @@ class ShodanObject:
             del input_dict['_shodan']
         except KeyError:
             pass
-
         # asn to int
         try:
             input_dict['asn'] = int((input_dict['asn'])[2:])
@@ -70,17 +69,29 @@ class ShodanObject:
             del input_dict['location']['longitude']
         except KeyError:
             pass
-        # Convert the 'nodes' and it's nested fields to 1 string, otherwise Elasticsearch will make new fields
-        # for EVERY node ID.
+
+        # Limit the number of fields
+        input_dict = self.limit_nr_of_elements(input_dict)
+
+        # prefix non-nested fields with 'shodan'
+        input_dict = dict_add_source_prefix(input_dict, 'shodan', str(input_dict['protocols']))
+        return input_dict
+
+    @staticmethod
+    def limit_nr_of_elements(self, input_dict):
+        """Converts some of the JSON elements containing (too) many nested elements to 1 string element.
+        This prevents Elasticsearch from making too many fields, so it is still manageable in Kibana.
+        """
+        try:
+            input_dict['http']['components'] = str(
+                input_dict['http']['components'])
+        except KeyError:
+            pass
         try:
             input_dict['elastic'] = str(
                 input_dict['elastic'])
         except KeyError:
             pass
-
-        # prefix non-nested fields with 'shodan'
-        input_dict = dict_add_source_prefix(input_dict, 'shodan', str(input_dict['protocols']))
-        return input_dict
 
     @staticmethod
     def to_file_shodan(self, queries, path_output_file, should_convert):
