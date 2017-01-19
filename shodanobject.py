@@ -71,7 +71,7 @@ class ShodanObject:
             pass
 
         # Limit the number of fields
-        input_dict = self.limit_nr_of_elements(input_dict)
+        input_dict = self.limit_nr_of_elements(self, input_dict)
 
         # prefix non-nested fields with 'shodan'
         input_dict = dict_add_source_prefix(input_dict, 'shodan', str(input_dict['protocols']))
@@ -92,6 +92,7 @@ class ShodanObject:
                 input_dict['elastic'])
         except KeyError:
             pass
+        return input_dict
 
     @staticmethod
     def to_file_shodan(self, queries, path_output_file, should_convert):

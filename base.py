@@ -95,7 +95,7 @@ def dict_add_source_prefix(obj, source_str, shodan_protocol_str=''):
                               'location.country_name', 'location.dma_code', 'location.latitude', 'location.longitude',
                               'location.postal_code', 'location.region_code', 'opts', 'org', 'isp', 'os', 'transport',
                               'protocols']
-    for key in obj:
+    for key in list(obj):
         # prefix all non-nested elements except ip and ip_int
         if '.' not in key and key not in keys_not_source_prefixed:
             # if other OSINT than Shodan, just prefix source
@@ -132,13 +132,13 @@ def dict_clean_empty(d):
     return {k: v for k, v in ((k, dict_clean_empty(v)) for k, v in d.items()) if v or v == 0}
 
 
-def ask_input_file():
+def ask_input_file(path_prefix=''):
     """Return existing file from user input"""
     input_file = Path('')
     input_file_path = ''
     while not input_file.is_file():
-        input_file_path = input('Input file:')
-        input_file = Path(input_file_path)
+        input_file_path = input('Input file:' + path_prefix)
+        input_file = Path(path_prefix + input_file_path)
     return input_file
 
 
@@ -151,11 +151,23 @@ def ask_input_directory():
 
 
 def ask_output_file(str_prefix_output_file):
-    """Return valid file path string from user input """
+    """Return valid file path string for new file from user input """
     str_name_output_file = ''
     while not is_valid_file_name(str_name_output_file):
         str_name_output_file = input('Output file:' + str_prefix_output_file)
-    return str_prefix_output_file + str_name_output_file
+    str_output_file = str_prefix_output_file + str_name_output_file
+    return increment_until_new_file(str_output_file)
+
+
+def increment_until_new_file(str_file):
+    """Will increment given file path with number until file path does not exist yet."""
+    i = 0
+    str_final_file = str_file
+    while os.path.exists(str_final_file):
+        i += 1
+        str_final_file = os.path.dirname(str_file) + '/' + os.path.splitext(os.path.basename(str(str_file)))[
+            0] + str(i) + os.path.splitext(os.path.basename(str(str_file)))[1]
+    return str_final_file
 
 
 def get_organizations_from_csv(str_path_csv_file):
