@@ -71,8 +71,8 @@ def parse_all_cidrs_from_file(file_path):
 
 
 def is_valid_file_name(str_input):
-    """Returns if str is valid file name. May only contain: ascii_lowercase, digits, dot, dash, underscore"""
-    allowed = set(string.ascii_lowercase + string.digits + '.-_')
+    """Returns if str is valid file name. May only contain: ascii_lowercase, ascii_uppercase, digits, dot, dash, underscore"""
+    allowed = set(string.ascii_lowercase + string.ascii_uppercase + string.digits + '.-_')
     if str_input is not '':
         return set(str_input) <= allowed
     return False
