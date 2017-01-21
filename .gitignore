@@ -46,7 +46,8 @@ fabric.properties
 # config.ini containing configuration for scripts
 config.ini
 
+# contains debugging scripts
+/debug/
+
 *.pyc 
 __pycache__/
-
-
