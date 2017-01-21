@@ -26,7 +26,6 @@ if choice is 'f':
     print('Converted ' + str(input_file.as_posix()) + ' to ' + str_path_output_file)
 elif choice is 'd':
     input_directory = ask_input_directory()
-    output_directory = create_output_directory(input_directory)
     files_to_convert = []
     for file in os.listdir(input_directory):
         if file.endswith(".json"):
@@ -34,6 +33,7 @@ elif choice is 'd':
     print('These files will be converted: ' + str(files_to_convert))
     print('Total number of files: ' + str(len(files_to_convert)))
     ask_continue()
+    output_directory = create_output_directory(input_directory)
     counter = 0
     for input_file in files_to_convert:
         counter += 1

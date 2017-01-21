@@ -40,7 +40,7 @@ class CensysObject:
         items = {'1': 'CIDR', '2': 'ASN', '3': 'CIDR file', '4': 'Custom WHERE query', '5': 'CSV file input'}
         input_choice = '0'
         while input_choice not in items:
-            input_choice = input("Input: CIDR [1], ASN [2],CIDR file[3], custom query[4], or csv file input[5]??")
+            input_choice = input("Input: CIDR [1], ASN [2], CIDR file[3], custom query[4], or csv file input[5]?")
         return int(input_choice)
 
     @staticmethod
@@ -139,7 +139,7 @@ class CensysObject:
         api = censys.export.CensysExport(api_id=CENSYS_API_ID, api_secret=CENSYS_API_KEY)
 
         # Start new Job
-        res = api.new_job(query)
+        res = api.new_job(query, flatten=False)
         job_id = res["job_id"]
         result = api.check_job_loop(job_id)
 
