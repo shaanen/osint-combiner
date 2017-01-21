@@ -191,7 +191,7 @@ class CensysObject:
 
         #  Remove 'p' from every protocol key
         pattern = re.compile("^p[0-9]{1,6}$")
-        for key in input_dict:
+        for key in list(input_dict):
             if pattern.match(key):
                 input_dict[key[1:]] = input_dict[key]
                 del input_dict[key]
