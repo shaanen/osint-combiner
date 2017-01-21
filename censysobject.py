@@ -186,6 +186,9 @@ class CensysObject:
         except KeyError:
             pass
 
+        # Limit the number of fields
+        input_dict = self.limit_nr_of_elements(self, input_dict)
+
         #  Remove 'p' from every protocol key
         pattern = re.compile("^p[0-9]{1,6}$")
         for key in input_dict:
@@ -195,6 +198,18 @@ class CensysObject:
 
         # prefix non-nested fields with 'censys'
         input_dict = dict_add_source_prefix(input_dict, 'censys')
+        return input_dict
+
+    @staticmethod
+    def limit_nr_of_elements(self, input_dict):
+        """Converts some of the JSON elements containing (too) many nested elements to 1 string element.
+        This prevents Elasticsearch from making too many fields, so it is still manageable in Kibana.
+        """
+        try:
+            input_dict['p25']['smtp']['starttls']['tls']['chain'] = str(
+                input_dict['p25']['smtp']['starttls']['tls']['chain'])
+        except KeyError:
+            pass
         return input_dict
 
 
