@@ -210,6 +210,26 @@ class CensysObject:
                 input_dict['p25']['smtp']['starttls']['tls']['chain'])
         except KeyError:
             pass
+        try:
+            input_dict['p110']['pop3']['starttls']['tls']['chain'] = str(
+                input_dict['p110']['pop3']['starttls']['tls']['chain'])
+        except KeyError:
+            pass
+        try:
+            input_dict['p143']['imap']['starttls']['tls']['chain'] = str(
+                input_dict['p143']['imap']['starttls']['tls']['chain'])
+        except KeyError:
+            pass
+        try:
+            input_dict['p443']['https']['tls']['chain'] = str(
+                input_dict['p443']['https']['tls']['chain'])
+        except KeyError:
+            pass
+        try:
+            input_dict['p995']['pop3s']['tls']['tls']['chain'] = str(
+                input_dict['p995']['pop3s']['tls']['tls']['chain'])
+        except KeyError:
+            pass
         return input_dict
 
 
