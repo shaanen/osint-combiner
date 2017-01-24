@@ -20,7 +20,6 @@ class CensysObject:
         config.read("config.ini")
         self.CENSYS_API_ID = (config['SectionOne']['CENSYS_API_ID'])
         self.CENSYS_API_KEY = (config['SectionOne']['CENSYS_API_KEY'])
-        self.api = censys.export.CensysExport(api_id=self.CENSYS_API_ID, api_secret=self.CENSYS_API_KEY)
 
     @staticmethod
     def get_latest_ipv4_tables(self):
@@ -37,7 +36,7 @@ class CensysObject:
     @staticmethod
     def get_input_choice(self):
         """Returns input_choice represented as integer"""
-        items = {'1': 'CIDR', '2': 'ASN', '3': 'CIDR file', '4': 'Custom WHERE query', '5': 'CSV file input'}
+        items = ['1', '2', '3', '4', '5']
         input_choice = '0'
         while input_choice not in items:
             input_choice = input("Input: CIDR [1], ASN [2], CIDR file[3], custom query[4], or csv file input[5]?")
@@ -187,7 +186,7 @@ class CensysObject:
             pass
 
         # Limit the number of fields
-        input_dict = self.limit_nr_of_elements(self, input_dict)
+        input_dict = self.__limit_nr_of_elements(self, input_dict)
 
         #  Remove 'p' from every protocol key
         pattern = re.compile("^p[0-9]{1,6}$")
@@ -201,7 +200,7 @@ class CensysObject:
         return input_dict
 
     @staticmethod
-    def limit_nr_of_elements(self, input_dict):
+    def __limit_nr_of_elements(self, input_dict):
         """Converts some of the JSON elements containing (too) many nested elements to 1 string element.
         This prevents Elasticsearch from making too many fields, so it is still manageable in Kibana.
         """

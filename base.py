@@ -10,19 +10,18 @@ from pathlib import Path
 import json
 from collections import defaultdict
 
-config = configparser.ConfigParser()
-config.read("config.ini")
-CENSYS_API_ID = (config['SectionOne']['CENSYS_API_ID'])
-CENSYS_API_KEY = (config['SectionOne']['CENSYS_API_KEY'])
-SHODAN_API_KEY = (config['SectionOne']['SHODAN_API_KEY'])
-ES_IP = (config['SectionOne']['ELASTICSEARCH_IP'])
-nrOfResults = 0
+
+def get_es_cluster_ip():
+    """Returns the Elasticsearch IP from config.ini"""
+    config = configparser.ConfigParser()
+    config.read("config.ini")
+    return config['SectionOne']['ELASTICSEARCH_IP']
 
 
 def es_get_all_ips(str_existing_index):
     """Returns list of list_of_ips stored in given Elasticsearch index"""
     list_ips = []
-    es = Elasticsearch(([{'host': ES_IP}]))
+    es = Elasticsearch(([{'host': get_es_cluster_ip()}]))
     count = es.count(index=str_existing_index)['count']
     res = es.search(index=str_existing_index,
                     body={"size": 0, "aggs": {"all_ip": {"terms": {"field": "ip", "size": count}}}})
@@ -34,11 +33,11 @@ def es_get_all_ips(str_existing_index):
 
 
 def exists_es_index(str_valid_index):
-    """Return if given index string exists in ElasticSearch cluster"""
+    """Returns if given index string exists in ElasticSearch cluster"""
     connection_attempts = 0
     while connection_attempts < 3:
         try:
-            es = Elasticsearch(([{'host': ES_IP}]))
+            es = Elasticsearch(([{'host': get_es_cluster_ip()}]))
             es_indices = es.indices
             return es_indices.exists(index=str_valid_index)
         except exceptions.ConnectionTimeout:
@@ -71,7 +70,9 @@ def parse_all_cidrs_from_file(file_path):
 
 
 def is_valid_file_name(str_input):
-    """Returns if str is valid file name. May only contain: ascii_lowercase, ascii_uppercase, digits, dot, dash, underscore"""
+    """Returns if str is valid file name.
+    May only contain: ascii_lowercase, ascii_uppercase, digits, dot, dash, underscore
+    """
     allowed = set(string.ascii_lowercase + string.ascii_uppercase + string.digits + '.-_')
     if str_input is not '':
         return set(str_input) <= allowed
@@ -79,7 +80,9 @@ def is_valid_file_name(str_input):
 
 
 def is_valid_es_index_name(str_input):
-    """Returns if str is valid Elasticsearch index name. May only contain: ascii_lowercase, digits, dash, underscore"""
+    """Returns if str is valid Elasticsearch index name.
+    May only contain: ascii_lowercase, digits, dash, underscore
+    """
     allowed = set(string.ascii_lowercase + string.digits + '-_')
     if str_input is not '':
         return set(str_input) <= allowed
@@ -133,7 +136,7 @@ def dict_clean_empty(d):
 
 
 def ask_input_file(path_prefix=''):
-    """Return existing file from user input"""
+    """Returns existing file from user input"""
     input_file = Path('')
     input_file_path = ''
     while not input_file.is_file():
@@ -143,7 +146,7 @@ def ask_input_file(path_prefix=''):
 
 
 def ask_input_directory():
-    """Return existing directory from user input"""
+    """Returns existing directory from user input"""
     input_directory = ''
     while not os.path.isdir(input_directory):
         input_directory = input('Input directory:')
@@ -151,7 +154,7 @@ def ask_input_directory():
 
 
 def ask_output_file(str_prefix_output_file):
-    """Return valid file path string for new file from user input """
+    """Returns valid file path string for new file from user input """
     str_name_output_file = ''
     while not is_valid_file_name(str_name_output_file):
         str_name_output_file = input('Output file:' + str_prefix_output_file)
