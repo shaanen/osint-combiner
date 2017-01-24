@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from shodanobject import ShodanObject
+from shodanfunctions import *
 from base import get_queries_per_line_from_file
 from base import parse_all_cidrs_from_file
 from base import ask_output_file
@@ -8,12 +8,8 @@ from base import ask_continue
 from base import get_user_boolean
 import os.path
 
-
-shodan = ShodanObject()
-choice = shodan.get_input_choice(shodan)
+choice = get_input_choice()
 should_convert = get_user_boolean('Also convert to es? y/n')
-
-
 queries = set()
 str_path_output_file = ''
 if choice is not 3:
@@ -21,15 +17,15 @@ if choice is not 3:
 
 # 1= console queries input
 if choice is 1:
-    queries = shodan.get_user_input_console_queries()
-    shodan.to_file_shodan(shodan, queries, str_path_output_file, should_convert)
+    queries = get_user_input_console_queries()
+    to_file_shodan(queries, str_path_output_file, should_convert)
 # 2= CIDR file input
 elif choice is 2:
     input_file_path = ''
     while not os.path.isfile(input_file_path):
         input_file_path = input('Input CIDR file:')
     queries = ['net:' + s for s in parse_all_cidrs_from_file(input_file_path)]
-    shodan.to_file_shodan(shodan, queries, str_path_output_file, should_convert)
+    to_file_shodan(queries, str_path_output_file, should_convert)
 # 3= CSV file input
 elif choice is 3:
     input_file_path = ''
@@ -48,7 +44,7 @@ elif choice is 3:
             str_path_output_file = 'outputfiles/shodan/shodan-' + name + '-converted.json'
         else:
             str_path_output_file = 'outputfiles/shodan/shodan-' + name + '.json'
-        shodan.to_file_shodan(shodan, queries, str_path_output_file, should_convert)
+        to_file_shodan(queries, str_path_output_file, should_convert)
 # 4= query file input
 elif choice is 4:
     input_file_path = ''
@@ -59,4 +55,4 @@ elif choice is 4:
     print('The following Shodan queries will be executed:')
     print("\n".join(queries))
     ask_continue()
-    shodan.to_file_shodan(shodan, queries, str_path_output_file, should_convert)
+    to_file_shodan(queries, str_path_output_file, should_convert)

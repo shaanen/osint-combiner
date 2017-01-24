@@ -9,13 +9,12 @@ import requests
 import json
 import re
 import sys
-import threading
 
 
 class CensysObject:
 
     def __init__(self):
-        """Return a CensysObject initialised with API ID and key"""
+        """Returns a CensysObject initialised with API ID and key"""
         config = configparser.ConfigParser()
         config.read("config.ini")
         self.CENSYS_API_ID = (config['SectionOne']['CENSYS_API_ID'])
@@ -28,9 +27,9 @@ class CensysObject:
         numbers = set()
         ipv4_tables = c.get_series_details("ipv4")['tables']
         for string in ipv4_tables:
-            splitted_number = string.split('.')[1]
-            if splitted_number != 'test':
-                numbers.add(splitted_number)
+            split_number = string.split('.')[1]
+            if split_number != 'test':
+                numbers.add(split_number)
         return max(numbers)
 
     @staticmethod
@@ -160,7 +159,7 @@ class CensysObject:
 
     @staticmethod
     def to_es_convert(self, input_dict):
-        """Return dict ready to be sent to Logstash."""
+        """Returns dict ready to be used by the Elastic Stack."""
         try:
             # convert ip_int to ipint
             input_dict['ip_int'] = input_dict['ipint']

@@ -15,7 +15,7 @@ censys = CensysObject()
 choice = get_option_from_user('File input or directory input?(f/d)', {'f', 'd'})
 if choice is 'f':
     input_file = ask_input_file('outputfiles/censys/')
-    str_path_output_file = increment_until_new_file('sample_outputfiles/' +
+    str_path_output_file = increment_until_new_file('converted_outputfiles/' +
                                                     os.path.splitext(os.path.basename(str(input_file)))[0]
                                                     + '-converted' + os.path.splitext(str(input_file))[1])
     with open(str_path_output_file, 'a', encoding='utf-8') as output_file:

@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 import time
 import os
 import queue
-from ipinfoobject import IpInfoObject
+from ipinfofunctions import *
 from base import get_cidr_from_user_input
 from base import parse_all_cidrs_from_file
 from base import es_get_all_ips
@@ -129,12 +129,11 @@ def cidr_to_ipinfo(cidr_input, path_output_file, should_be_converted):
         for str_banner in result_list:
             banner = dict_clean_empty(json.loads(str_banner))
             if should_be_converted:
-                banner = ipinfo.to_es_convert(ipinfo, banner)
+                banner = to_es_convert(banner)
             output_file.write(json.dumps(banner) + '\n')
     print('\r' + str(len(result_list)) + ' results written in ' + path_output_file, end='')
 
-ipinfo = IpInfoObject()
-choice = ipinfo.get_input_choice(ipinfo)
+choice = get_input_choice()
 should_convert = get_user_boolean('Also convert to es? y/n')
 str_path_output_file = ask_output_file('outputfiles/ipinfo/')
 

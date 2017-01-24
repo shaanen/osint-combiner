@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from ipinfoobject import IpInfoObject
+from ipinfofunctions import *
 from base import dict_clean_empty
 from base import ask_input_file
 from base import ask_input_directory
@@ -11,17 +11,16 @@ import json
 import os
 
 print('---IpInfo json converter---')
-ipinfo = IpInfoObject
 choice = get_option_from_user('File input or directory input?(f/d)', {'f', 'd'})
 if choice is 'f':
     input_file = ask_input_file('outputfiles/ipinfo/')
-    str_path_output_file = increment_until_new_file('sample_outputfiles/' +
+    str_path_output_file = increment_until_new_file('converted_outputfiles/' +
                                                     os.path.splitext(os.path.basename(str(input_file)))[0]
                                                     + '-converted' + os.path.splitext(str(input_file))[1])
     with open(str_path_output_file, 'a') as output_file:
         for str_banner in input_file.open():
             banner = dict_clean_empty(json.loads(str_banner))
-            ipinfo.to_es_convert(ipinfo, banner)
+            to_es_convert(banner)
             output_file.write(json.dumps(banner) + '\n')
     print('Converted ' + str(input_file.as_posix()) + ' to ' + str_path_output_file)
 elif choice is 'd':
@@ -43,6 +42,6 @@ elif choice is 'd':
             for str_banner in open(input_directory + '/' + input_file, 'r'):
                 if str_banner != '\n':
                     banner = dict_clean_empty(json.loads(str_banner))
-                    ipinfo.to_es_convert(ipinfo, banner)
+                    to_es_convert(banner)
                     output_file.write(json.dumps(banner) + '\n')
     print('\nConverted files written in ' + output_directory)
