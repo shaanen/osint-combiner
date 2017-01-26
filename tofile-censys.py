@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from censysobject import CensysObject
+from censysfunctions import *
 from base import get_cidr_from_user_input
 from base import ask_output_file
 from base import ask_input_file
@@ -13,11 +13,11 @@ import time
 import os.path
 import queue
 
-exitFlag = 0
-nr_threads = 201
-workQueue = queue.Queue(0)
+exit_flag = 0
+nr_threads = 4
+work_queue = queue.Queue(0)
 threads = []
-queueLock = threading.Lock()
+queue_lock = threading.Lock()
 
 
 # Threading class for one GET request
@@ -30,55 +30,55 @@ class CensysSQLExportThread (threading.Thread):
         self.should_convert = False
 
     def run(self):
-        global exitFlag
-        while not exitFlag:
-            queueLock.acquire()
-            if not workQueue.empty():
+        global exit_flag
+        while not exit_flag:
+            queue_lock.acquire()
+            if not work_queue.empty():
                 self.query = self.q.get()[0]
                 self.path_output_file = self.q.get()[1]
                 self.should_convert = self.q.get()[2]
-                queueLock.release()
-                censys.to_file(censys, self.query, self.path_output_file, self.should_convert)
+                queue_lock.release()
+                # to_file(self.query, self.path_output_file, self.should_convert)
+                print('Thread run: ' + self.path_output_file)
+                time.sleep(1)
             else:
-                queueLock.release()
+                queue_lock.release()
             time.sleep(1)
 
 
-def handle_organizations():
+def to_file_organizations():
     for num in range(1, nr_threads + 1):
-        thread = CensysSQLExportThread(workQueue)
+        thread = CensysSQLExportThread(work_queue)
         thread.start()
         threads.append(thread)
 
     # Fill the queue
-    with queueLock:
-        count = 0
-        latest_table = censys.get_latest_ipv4_tables(censys)
+    with queue_lock:
+        latest_table = get_latest_ipv4_tables()
+        print('len organizations.items: ' + str(len(organizations.items())))
         for name, cidrs in organizations.items():
-            count += 1
-            # print(name + ' [' + str(count) + '/' + str(len(organizations)) + ']...')
-            organization_query = censys.prepare_ip_or_cidr_query(censys, cidrs, latest_table)
+            organization_query = prepare_cidrs_query(cidrs, latest_table)
+            path_output_file = 'outputfiles/censys/censys-' + name
             if should_convert:
-                path_output_file = 'outputfiles/censys/censys-' + name + '-converted.json'
+                path_output_file += '-converted.json'
             else:
-                path_output_file = 'outputfiles/censys/censys-' + name + '.json'
-            workQueue.put([organization_query, path_output_file, should_convert])
+                path_output_file += '.json'
+            work_queue.put([organization_query, path_output_file, should_convert])
+            print(work_queue)
 
     # Wait for queue to empty
-    while not workQueue.empty():
+    while not work_queue.empty():
         pass
 
     # Notify threads it's time to exit
-    global exitFlag
-    exitFlag = 1
+    global exit_flag
+    exit_flag = 1
 
     # Wait for all GetIpInfoThreads to complete
     for t in threads:
         t.join()
 
-
-censys = CensysObject()
-choice = censys.get_input_choice(censys)
+choice = get_input_choice()
 str_path_output_file = ''
 if choice is not 5:
     str_path_output_file = ask_output_file('outputfiles/censys/')
@@ -87,24 +87,24 @@ should_convert = get_user_boolean('Also convert to es? y/n')
 # 1=Console CIDR input
 if choice is 1:
     cidr = get_cidr_from_user_input()
-    query = censys.prepare_ip_or_cidr_query(censys, cidr)
-    censys.to_file(censys, query, str_path_output_file, should_convert)
+    query = prepare_cidrs_query(cidr)
+    to_file(query, str_path_output_file, should_convert)
 # 2=Console ASN input
 elif choice is 2:
-    asn = censys.get_user_input_asn(censys)
-    query = censys.prepare_asn_query(censys, asn)
-    censys.to_file(censys, query, str_path_output_file, should_convert)
+    asn = get_user_input_asn()
+    query = prepare_asn_query(asn)
+    to_file(query, str_path_output_file, should_convert)
 # 3= CIDR file input
 elif choice is 3:
     input_file = ask_input_file()
     set_cidrs = parse_all_cidrs_from_file(str(input_file))
     for cidr in set_cidrs:
-        query = censys.prepare_ip_or_cidr_query(censys, IPNetwork(cidr))
-        censys.to_file(censys, query, str_path_output_file, should_convert)
+        query = prepare_cidrs_query(IPNetwork(cidr))
+        to_file(query, str_path_output_file, should_convert)
 # 4=Console Custom WHERE query
 elif choice is 4:
-    query = censys.prepare_custom_query(censys, censys.sql_get_custom_query_from_user(censys))
-    censys.to_file(censys, query, str_path_output_file, should_convert)
+    query = prepare_custom_query(sql_get_custom_query_from_user())
+    to_file(query, str_path_output_file, should_convert)
 # 5= CSV file input
 elif choice is 5:
     input_file_path = ''
@@ -114,6 +114,4 @@ elif choice is 5:
     print(organizations.keys())
     print(str(len(organizations)) + ' organizations found.')
     ask_continue()
-    handle_organizations()
-
-
+    to_file_organizations()

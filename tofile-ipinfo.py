@@ -26,7 +26,7 @@ conn_err_counter = 0
 connection_err_lock = threading.Lock()
 timeout_err_counter = 0
 timeout_err_lock = threading.Lock()
-exitFlag = 0
+exit_flag = 0
 queueLock = threading.Lock()
 workQueue = queue.Queue(0)
 threads = []
@@ -43,7 +43,7 @@ class GetIpInfoThread (threading.Thread):
         global done_counter
         global conn_err_counter
         global timeout_err_counter
-        while not exitFlag:
+        while not exit_flag:
             queueLock.acquire()
             if not workQueue.empty():
                 self.data = self.q.get()
@@ -77,7 +77,7 @@ def cidr_to_ipinfo(cidr_input, path_output_file, should_be_converted):
 
     cidr_input -- A list of Strings or an IPNetwork
     """
-    global exitFlag
+    global exit_flag
     nr_threads = 0
     if type(cidr_input) is IPNetwork:
         if cidr_input.size < 16:

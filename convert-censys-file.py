@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from censysobject import CensysObject
+from censysfunctions import CensysObject
 from base import dict_clean_empty
 from base import ask_input_file
 from base import increment_until_new_file
