@@ -93,7 +93,7 @@ def dict_add_source_prefix(obj, source_str, shodan_protocol_str=''):
     """Return dict where any non-nested element (except 'ip and ip_int') is prefixed by the OSINT source name"""
     keys_not_source_prefixed = ['ip', 'asn', 'ip_int']
     # These will still have the source prefixed
-    shodan_keys_not_port_prefixed = ['asn', 'data', 'ip', 'ipv6 port', 'hostnames', 'domains', 'location',
+    shodan_keys_not_protocol_prefixed = ['asn', 'ip', 'ipv6 port', 'hostnames', 'domains', 'location',
                                 'location.area_code', 'location.city', 'location.country_code', 'location.country_code3',
                               'location.country_name', 'location.dma_code', 'location.latitude', 'location.longitude',
                               'location.postal_code', 'location.region_code', 'opts', 'org', 'isp', 'os', 'transport',
@@ -107,7 +107,7 @@ def dict_add_source_prefix(obj, source_str, shodan_protocol_str=''):
             # if shodan
             else:
                 # just prefix source if general shodan key
-                if key in shodan_keys_not_port_prefixed:
+                if key in shodan_keys_not_protocol_prefixed:
                     new_key = key.replace(key, (source_str + "." + key))
                 # prefix source AND shodan.module (protocol) if protocol-specific key
                 else:
