@@ -94,10 +94,10 @@ def dict_add_source_prefix(obj, source_str, shodan_protocol_str=''):
     keys_not_source_prefixed = ['ip', 'asn', 'ip_int']
     # These will still have the source prefixed
     shodan_keys_not_protocol_prefixed = ['asn', 'ip', 'ipv6 port', 'hostnames', 'domains', 'location',
-                                'location.area_code', 'location.city', 'location.country_code', 'location.country_code3',
-                              'location.country_name', 'location.dma_code', 'location.latitude', 'location.longitude',
-                              'location.postal_code', 'location.region_code', 'opts', 'org', 'isp', 'os', 'transport',
-                              'protocols']
+                                                'location.area_code', 'location.city', 'location.country_code',
+                                         'location.country_code3', 'location.country_name', 'location.dma_code',
+                                         'location.latitude', 'location.longitude', 'location.postal_code',
+                                         'location.region_code', 'opts', 'org', 'isp', 'os', 'transport', 'protocols']
     for key in list(obj):
         # prefix all non-nested elements except ip and ip_int
         if '.' not in key and key not in keys_not_source_prefixed:

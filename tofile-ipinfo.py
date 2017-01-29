@@ -108,7 +108,7 @@ def cidr_to_ipinfo(cidr_input, path_output_file, should_be_converted):
         pass
 
     # Notify threads it's time to exit
-    exitFlag = 1
+    exit_flag = 1
 
     # Wait for all GetIpInfoThreads to complete
     for t in threads:

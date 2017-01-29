@@ -42,7 +42,7 @@ elif choice is 'd':
     for input_file in files_to_convert:
         counter += 1
         str_output_file = output_directory + '/' + input_file[:-5] + '-converted.json'
-        print('\r' + 'Converting ' + input_file + '[' + str(counter) + '/' + str(len(files_to_convert)) + ']...', end='')
+        print('\r' + 'Converting ' + input_file + '[' + str(counter) + '/' + str(len(files_to_convert)) + ']..', end='')
         with open(str_output_file, 'a') as output_file:
             for str_banner in open(input_directory + '/' + input_file, 'r'):
                 if str_banner != '\n':
