@@ -98,9 +98,8 @@ elif choice is 2:
 elif choice is 3:
     input_file = ask_input_file()
     set_cidrs = parse_all_cidrs_from_file(str(input_file))
-    for cidr in set_cidrs:
-        query = prepare_cidrs_query(IPNetwork(cidr))
-        to_file(query, str_path_output_file, should_convert)
+    query = prepare_cidrs_query(set_cidrs)
+    to_file(query, str_path_output_file, should_convert)
 # 4=Console Custom WHERE query
 elif choice is 4:
     query = prepare_custom_query(sql_get_custom_query_from_user())
