@@ -1,21 +1,25 @@
 #!/usr/bin/env python3
 from shodanfunctions import *
+from pathlib import Path
 from base import dict_clean_empty
-from base import ask_input_file
-from base import ask_input_directory
-from base import get_option_from_user
 from base import create_output_directory
 from base import ask_continue
 from base import increment_until_new_file
+import argparse
 import json
 import os
 
-print('---Shodan json converter---')
-choice = get_option_from_user('File input or directory input?(f/d)', {'f', 'd'})
+parser = argparse.ArgumentParser()
+parser.add_argument("input", help="the input file or directory of files to be converted")
+parser.add_argument("-y", "--yes", "--assume-yes", help="Automatic yes to prompts; assume \"yes\" as answer to all "
+                                                        "prompts and run non-interactively.", action="store_true")
+args = parser.parse_args()
+
+print('---Shodan converter---')
 
 # A file input
-if choice is 'f':
-    input_file = ask_input_file('outputfiles/shodan/')
+if Path(args.input).is_file():
+    input_file = Path(args.input)
     str_path_output_file = increment_until_new_file('converted_outputfiles/' +
                                                     os.path.splitext(os.path.basename(str(input_file)))[0]
                                                     + '-converted' + os.path.splitext(str(input_file))[1])
@@ -28,15 +32,16 @@ if choice is 'f':
     print('Converted ' + str(input_file.as_posix()) + ' to ' + str_path_output_file)
 
 # A directory input
-elif choice is 'd':
-    input_directory = ask_input_directory()
+elif os.path.isdir(args.input):
+    input_directory = args.input
     files_to_convert = []
     for file in os.listdir(input_directory):
         if file.endswith(".json"):
             files_to_convert.append(file)
     print('These files will be converted: ' + str(files_to_convert))
     print('Total number of files: ' + str(len(files_to_convert)))
-    ask_continue()
+    if not args.yes:
+        ask_continue()
     output_directory = create_output_directory(input_directory)
     counter = 0
     for input_file in files_to_convert:
@@ -50,3 +55,6 @@ elif choice is 'd':
                     to_es_convert(banner)
                     output_file.write(json.dumps(banner) + '\n')
     print('\nConverted files written in ' + output_directory)
+else:
+    msg = "{0} is not an existing file or directory".format(args.input)
+    raise argparse.ArgumentTypeError(msg)
