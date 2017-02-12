@@ -57,7 +57,7 @@ def get_cidr_from_user_input():
     return ip_or_cidr
 
 
-def parse_all_cidrs_from_file(file_path):
+def parse_all_cidrs_from_file(file_path, assume_yes):
     """Returns set of CIDR strings from given file"""
     output = set()
     while not output:
@@ -65,7 +65,8 @@ def parse_all_cidrs_from_file(file_path):
             output = set(re.findall('(?:\d{1,3}\.){3}\d{1,3}(?:/\d\d?)?', f.read()))
             print('CIDRs Found:' + str(output))
             print('Total CIDRs in file: ' + str(len(output)))
-            ask_continue()
+            if not assume_yes:
+                ask_continue()
     return output
 
 

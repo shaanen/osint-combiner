@@ -123,7 +123,10 @@ def to_file_shodan(queries, path_output_file, should_convert):
     # Print failed queries if present
     if not failed_queries == set():
         print('Failed queries: ', failed_queries)
-    print(str(nr_total_results) + ' total results written in ' + path_output_file)
+    if should_convert:
+        print(str(nr_total_results) + ' total results converted and written in ' + path_output_file)
+    else:
+        print(str(nr_total_results) + ' total results written in ' + path_output_file)
 
 
 def get_input_choice():
@@ -150,4 +153,3 @@ def get_user_input_console_queries():
             else:
                 queries.add(query)
     return queries
-

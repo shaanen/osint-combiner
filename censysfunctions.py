@@ -37,10 +37,10 @@ def get_latest_ipv4_tables():
 
 def get_input_choice():
     """Returns input_choice represented as integer"""
-    items = ['1', '2', '3', '4', '5']
+    items = ['1', '2', '3']
     input_choice = '0'
     while input_choice not in items:
-        input_choice = input("Input: CIDR [1], ASN [2], CIDR file[3], custom query[4], or csv file input[5]?")
+        input_choice = input("Input: CIDR [1], ASN [2] or custom query[3]?")
     return int(input_choice)
 
 
@@ -148,7 +148,10 @@ def to_file(query, str_path_output_file, should_convert):
                         result = to_es_convert(result)
                     output_file.write(json.dumps(result) + '\n')
             total_results += len(list_of_json)
-        print('Appended ' + str(total_results) + ' query results to ', str_path_output_file)
+        if should_convert:
+            print('Converted and appended ' + str(total_results) + ' query results to ', str_path_output_file)
+        else:
+            print('Appended ' + str(total_results) + ' query results to ', str_path_output_file)
     else:
         print('Censys job failed.' + '\n' + str(result))
 

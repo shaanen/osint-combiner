@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 from netaddr import IPNetwork
+from netaddr import core
+from base import parse_all_cidrs_from_file
+from base import exists_es_index
+from base import es_get_all_ips
+from pathlib import Path
 import threading
 import requests
 import json
@@ -7,15 +12,9 @@ from datetime import datetime, timezone
 import time
 import os
 import queue
+import argparse
 from ipinfofunctions import *
-from base import get_cidr_from_user_input
-from base import parse_all_cidrs_from_file
-from base import es_get_all_ips
-from base import is_valid_es_index_name
-from base import exists_es_index
-from base import ask_output_file
 from base import dict_clean_empty
-from base import get_user_boolean
 
 url = 'http://ipinfo.dutchsec.nl/submit'
 headers = {'Content-Type': 'text/plain', 'Accept': 'text/json'}
@@ -30,6 +29,31 @@ exit_flag = 0
 queueLock = threading.Lock()
 workQueue = queue.Queue(0)
 threads = []
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-c", "--convert", help="Convert immediately without storing original file.", action="store_true")
+parser.add_argument("-y", "--yes", "--assume-yes", help="Automatic yes to prompts; assume \"yes\" as answer to all "
+                                                        "prompts and run non-interactively.", action="store_true")
+subparsers = parser.add_subparsers()
+cidr = subparsers.add_parser('cidr', help='One CIDR input')
+cidr.add_argument('inputcidr', help='The CIDR.')
+cidr.add_argument('outputfile', help='The file where the results will be stored.')
+cidr.set_defaults(subparser='cidr')
+
+cidrfile = subparsers.add_parser('cidrfile', help='Textfile containing multiple CIDRs;')
+cidrfile.add_argument("inputfile", help="the input file")
+cidrfile.add_argument('outputfile', help='The file where the results will be stored.')
+cidrfile.set_defaults(subparser='cidrfile')
+
+elastic_index = subparsers.add_parser('elastic-index', help='Existing Elasticsearch index as input')
+elastic_index.add_argument('index', help='The Elasticsearch index.')
+elastic_index.add_argument('outputfile', help='The file where the results will be stored.')
+elastic_index.set_defaults(subparser='elastic-index')
+
+args = parser.parse_args()
+choice = args.subparser
+should_convert = args.convert
+str_path_output_file = args.outputfile
 
 
 # Threading class for one GET request
@@ -131,21 +155,25 @@ def cidr_to_ipinfo(cidr_input, path_output_file, should_be_converted):
             if should_be_converted:
                 banner = to_es_convert(banner)
             output_file.write(json.dumps(banner) + '\n')
-    print('\r' + str(len(result_list)) + ' results written in ' + path_output_file, end='')
-
-choice = get_input_choice()
-should_convert = get_user_boolean('Also convert to es? y/n')
-str_path_output_file = ask_output_file('outputfiles/ipinfo/')
+    if should_convert:
+        print(str(len(result_list)) + ' results converted and written in ' + path_output_file)
+    else:
+        print(str(len(result_list)) + ' results written in ' + path_output_file)
 
 # 1= console CIDR input
-if choice is 1:
-    cidr_to_ipinfo(get_cidr_from_user_input(), str_path_output_file, should_convert)
+if choice is 'cidr':
+    try:
+        cidr = IPNetwork(args.inputcidr)
+    except core.AddrFormatError:
+        msg = "{0} is not a valid IP or CIDR".format(args.inputfile)
+        raise argparse.ArgumentTypeError(msg)
+    cidr_to_ipinfo(cidr, str_path_output_file, should_convert)
 # 2= CIDR file input
-elif choice is 2:
-    input_file_path = ''
-    while not os.path.isfile(input_file_path):
-        input_file_path = input('Input file:')
-    cidrs = parse_all_cidrs_from_file(input_file_path)
+elif choice is 'cidrfile':
+    if not Path(args.inputfile).is_file():
+        msg = "{0} is not an existing file".format(args.inputfile)
+        raise argparse.ArgumentTypeError(msg)
+    cidrs = parse_all_cidrs_from_file(args.inputfile, should_convert)
     print(cidrs, sep='\n')
     all_cidrs_are_just_one_ip = True
     for cidr in cidrs:
@@ -156,20 +184,16 @@ elif choice is 2:
         cidr_to_ipinfo(cidrs, str_path_output_file, should_convert)
     # list contains 1 or more CIDRS
     else:
+        count = 0
         for cidr in cidrs:
-            print('--Starting with CIDR: ' + cidr + ' (' + (str(cidrs.index(cidr) + 1)) + '/' + str(len(cidrs)) + ')--')
+            # TODO: Fix bug, only the first cidr will finish here
+            count += 1
+            print('--Starting with CIDR: ' + cidr + ' (' + (str(count)) + '/' + str(len(cidrs)) + ')--')
             cidr_to_ipinfo(IPNetwork(cidr), str_path_output_file, should_convert)
-# 3= Elasticsearch Input
-elif choice is 3:
-    str_input_es_index = ''
-    index_exists = False
-    while not index_exists:
-        str_input_es_index = ''
-        while not is_valid_es_index_name(str_input_es_index):
-            str_input_es_index = input('Elasticsearch index name:')
-        if exists_es_index(str_input_es_index):
-            index_exists = True
-        else:
-            print('Index does not exist')
-    list_of_ips = es_get_all_ips(str_input_es_index)
+# 3= Elasticsearch input
+elif choice is 'elastic-index':
+    if not exists_es_index(args.index):
+        msg = "{0} is not an existing Elasticsearch index".format(args.inputfile)
+        raise argparse.ArgumentTypeError(msg)
+    list_of_ips = es_get_all_ips(args.index)
     cidr_to_ipinfo(list_of_ips, str_path_output_file, should_convert)
