@@ -94,11 +94,11 @@ class GetIpInfoThread (threading.Thread):
             else:
                 queueLock.release()
             time.sleep(1)
+        print('Exit flag')
 
 
 def cidr_to_ipinfo(cidr_input, path_output_file, should_be_converted):
     """Makes ipinfo request for every given IP or CIDR and writes to given file
-
     cidr_input -- A list of Strings or an IPNetwork
     """
     global exit_flag
@@ -186,10 +186,10 @@ elif choice is 'cidrfile':
     else:
         count = 0
         for cidr in cidrs:
-            # TODO: Fix bug, only the first cidr will finish here
             count += 1
             print('--Starting with CIDR: ' + cidr + ' (' + (str(count)) + '/' + str(len(cidrs)) + ')--')
             cidr_to_ipinfo(IPNetwork(cidr), str_path_output_file, should_convert)
+            exit_flag = 0
 # 3= Elasticsearch input
 elif choice is 'elastic-index':
     if not exists_es_index(args.index):
