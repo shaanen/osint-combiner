@@ -108,7 +108,7 @@ def to_file_organizations():
         t.join()
 
 if Path(args.inputfile).is_file():
-    # query file input
+    # query file input, single threaded
     if choice is 'queryfile':
         queries = get_queries_per_line_from_file(args.inputfile)
         print('The following Censys queries will be executed:')
@@ -117,12 +117,12 @@ if Path(args.inputfile).is_file():
             ask_continue()
         for query in queries:
             to_file(prepare_custom_query(query), args.outputfile, should_convert)
-    # CIDR file input
+    # CIDR file input, single threaded
     elif choice is 'cidrfile':
         set_cidrs = parse_all_cidrs_from_file(str(args.inputfile), args.yes)
         query = prepare_cidrs_query(set_cidrs)
         to_file(query, args.outputfile, should_convert)
-    # CSV file input
+    # CSV file input, multi threaded
     elif choice is 'csvfile':
         organizations = get_organizations_from_csv(args.inputfile)
         print(organizations.keys())

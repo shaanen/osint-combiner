@@ -7,14 +7,15 @@ from base import dict_clean_empty
 from base import ConcatJSONDecoder
 import requests
 import json
-import re
 import sys
+import re
+import os
 
 
 def new_api_obj(str_type):
     """Returns initialised Censys SQL query API object"""
     config = configparser.ConfigParser()
-    config.read("config.ini")
+    config.read(os.path.dirname(os.path.realpath(__file__)) + "/config.ini")
     censys_id = (config['SectionOne']['CENSYS_API_ID'])
     censys_key = (config['SectionOne']['CENSYS_API_KEY'])
     if str_type == 'SQL_QUERY':

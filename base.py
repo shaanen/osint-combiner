@@ -1,20 +1,20 @@
+from netaddr import IPNetwork, AddrFormatError
 from elasticsearch import Elasticsearch
 from elasticsearch import exceptions
+from collections import defaultdict
+from pathlib import Path
 import configparser
-from netaddr import IPNetwork, AddrFormatError
-import re
 import string
+import json
 import sys
 import os
-from pathlib import Path
-import json
-from collections import defaultdict
+import re
 
 
 def get_es_cluster_ip():
     """Returns the Elasticsearch IP from config.ini"""
     config = configparser.ConfigParser()
-    config.read("config.ini")
+    config.read(os.path.dirname(os.path.realpath(__file__)) + "/config.ini")
     return config['SectionOne']['ELASTICSEARCH_IP']
 
 

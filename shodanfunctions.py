@@ -1,15 +1,16 @@
-import shodan
-import configparser
-import json
 from base import dict_add_source_prefix
 from base import dict_clean_empty
+import configparser
+import shodan
+import json
 import sys
+import os
 
 
 def get_new_shodan_api_object():
     """Returns initialised Shodan API object"""
     config = configparser.ConfigParser()
-    config.read("config.ini")
+    config.read(os.path.dirname(os.path.realpath(__file__)) + "/config.ini")
     key = (config['SectionOne']['SHODAN_API_KEY'])
     return shodan.Shodan(key)
 

@@ -94,7 +94,6 @@ class GetIpInfoThread (threading.Thread):
             else:
                 queueLock.release()
             time.sleep(1)
-        print('Exit flag')
 
 
 def cidr_to_ipinfo(cidr_input, path_output_file, should_be_converted):
