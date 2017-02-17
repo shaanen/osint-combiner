@@ -6,6 +6,10 @@ from base import parse_all_cidrs_from_file
 from base import ask_continue
 from pathlib import Path
 import argparse
+import os
+import sys
+
+os.chdir(sys.path[0])
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--convert", help="Convert immediately without storing original file.", action="store_true")

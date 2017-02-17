@@ -15,6 +15,9 @@ import queue
 import argparse
 from ipinfofunctions import *
 from base import dict_clean_empty
+import sys
+
+os.chdir(sys.path[0])
 
 url = 'http://ipinfo.dutchsec.nl/submit'
 headers = {'Content-Type': 'text/plain', 'Accept': 'text/json'}

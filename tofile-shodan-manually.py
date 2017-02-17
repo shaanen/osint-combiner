@@ -2,6 +2,10 @@
 from shodanfunctions import *
 from base import ask_output_file
 from base import get_user_boolean
+import os
+import sys
+
+os.chdir(sys.path[0])
 
 # Script where user can enter Shodan queries manually in the command-line
 should_convert = get_user_boolean('Also convert to es? y/n')

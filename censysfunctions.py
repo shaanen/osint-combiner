@@ -118,9 +118,10 @@ def prepare_asn_query(asn):
     return 'select * from ipv4.' + str(latest_table) + ' where autonomous_system.asn = ' + str(asn)
 
 
-def prepare_custom_query(query_part_after_where):
+def prepare_custom_query(query_part_after_where, latest_table=''):
     """Returns Censys custom SQL query string for given string"""
-    latest_table = get_latest_ipv4_tables()
+    if latest_table is '':
+        latest_table = get_latest_ipv4_tables()
     return 'select * from ipv4.' + str(latest_table) + ' where ' + str(query_part_after_where)
 
 

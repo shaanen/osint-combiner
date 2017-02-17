@@ -7,7 +7,10 @@ from base import create_output_directory
 from base import ask_continue
 import argparse
 import json
+import sys
 import os
+
+os.chdir(sys.path[0])
 
 parser = argparse.ArgumentParser()
 parser.add_argument("input", help="the input file or directory of files to be converted")

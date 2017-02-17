@@ -3,6 +3,10 @@ from censysfunctions import *
 from base import ask_output_file
 from base import get_user_boolean
 from base import get_cidr_from_user_input
+import os
+import sys
+
+os.chdir(sys.path[0])
 
 # Script where user can enter a CIDR or ASN or a Censys query manually in the command-line
 str_path_output_file = ask_output_file('outputfiles/censys/')
