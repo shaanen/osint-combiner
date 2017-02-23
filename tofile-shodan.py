@@ -8,7 +8,7 @@ import sys
 os.chdir(sys.path[0])
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-c", "--convert", help="Convert immediately without storing original file.", action="store_true")
+parser.add_argument("-c", "--convert", help="will also create a converted outputfile", action="store_true")
 parser.add_argument("-y", "--yes", "--assume-yes", help="Automatic yes to prompts; assume \"yes\" as answer to all "
                                                         "prompts and run non-interactively.", action="store_true")
 subparsers = parser.add_subparsers()
@@ -31,15 +31,16 @@ csv.set_defaults(subparser='csvfile')
 args = parser.parse_args()
 choice = get_input_choice(args)
 check_exists_input_file(args.inputfile)
-check_outputfile(args.outputfile)
 should_convert = args.convert
 
 # CIDR file input
 if choice is 'cidrfile':
+    check_outputfile(args.outputfile)
     queries = ['net:' + s for s in parse_all_cidrs_from_file(args.inputfile, args.yes)]
     to_file_shodan(queries, args.outputfile, should_convert)
 # query file input
 elif choice is 'queryfile':
+    check_outputfile(args.outputfile)
     queries = get_queries_per_line_from_file(args.inputfile)
     print('The following Shodan queries will be executed:')
     print("\n".join(queries))
@@ -58,8 +59,5 @@ elif choice is 'csvfile':
         count += 1
         queries = ['net:' + s for s in cidrs]
         print(name + ' [' + str(count) + '/' + str(len(organizations)) + ']...')
-        if should_convert:
-            str_path_output_file = 'outputfiles/shodan/shodan-' + name + '-converted.json'
-        else:
-            str_path_output_file = 'outputfiles/shodan/shodan-' + name + '.json'
+        str_path_output_file = 'outputfiles/shodan/shodan-' + name + '.json'
         to_file_shodan(queries, str_path_output_file, should_convert)

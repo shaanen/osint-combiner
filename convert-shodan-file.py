@@ -22,17 +22,7 @@ print('---Shodan converter---')
 
 # A file input
 if Path(args.input).is_file():
-    input_file = Path(args.input)
-    str_path_output_file = increment_until_new_file('converted_outputfiles/' +
-                                                    os.path.splitext(os.path.basename(str(input_file)))[0]
-                                                    + '-converted' + os.path.splitext(str(input_file))[1])
-    with open(str_path_output_file, 'a') as output_file:
-        for str_banner in input_file.open():
-            if str_banner != '\n':
-                banner = dict_clean_empty(json.loads(str_banner))
-                to_es_convert(banner)
-                output_file.write(json.dumps(banner) + '\n')
-    print('Converted ' + str(input_file.as_posix()) + ' to ' + str_path_output_file)
+    convert_file(args.input)
 
 # A directory input
 elif os.path.isdir(args.input):

@@ -1,5 +1,7 @@
+from base import get_path_converted_output_file
 from base import dict_add_source_prefix
 from base import dict_clean_empty
+from pathlib import Path
 import configparser
 import shodan
 import json
@@ -105,30 +107,39 @@ def to_file_shodan(queries, path_output_file, should_convert):
     failed_queries = set()
     for query in queries:
         print('\"' + query + '\"')
-        results = []
-        try:
-            for banner in api.search_cursor(query):
-                banner = dict_clean_empty(banner)
-                if should_convert:
-                    to_es_convert(banner)
-                results.append(json.dumps(banner) + '\n')
-                print('\r' + str(len(results)) + ' results fetched...', end='')
-        except shodan.APIError as e:
-            print('Error: ', e)
-            failed_queries.add(failed_queries)
+        results = 0
         with open(path_output_file, "a") as output_file:
-            print(path_output_file)
-            for banner in results:
-                output_file.write(banner)
-        print('\r' + str(len(results)) + ' results written.')
-        nr_total_results += len(results)
+            try:
+                for banner in api.search_cursor(query):
+                    banner = dict_clean_empty(banner)
+                    output_file.write(json.dumps(banner) + '\n')
+                    results += 1
+                    print('\r' + str(results) + ' results written...', end='')
+                print("")
+            except shodan.APIError as e:
+                print('Error: ', e)
+                failed_queries.add(failed_queries)
+        nr_total_results += results
     # Print failed queries if present
     if not failed_queries == set():
         print('Failed queries: ', failed_queries)
+
+    print(str(nr_total_results) + ' total results written in ' + path_output_file)
     if should_convert:
-        print(str(nr_total_results) + ' total results converted and written in ' + path_output_file)
-    else:
-        print(str(nr_total_results) + ' total results written in ' + path_output_file)
+        convert_file(path_output_file)
+
+
+def convert_file(str_path_input_file):
+    """Converts given inputfile to outputfile"""
+    str_path_output_file = get_path_converted_output_file(str_path_input_file)
+    with open(str_path_output_file, 'a') as output_file:
+        input_file = Path(str_path_input_file)
+        for str_banner in input_file.open():
+            if str_banner != '\n':
+                banner = dict_clean_empty(json.loads(str_banner))
+                to_es_convert(banner)
+                output_file.write(json.dumps(banner) + '\n')
+    print('Converted ' + str_path_input_file + ' to ' + str_path_output_file)
 
 
 def get_input_choice():

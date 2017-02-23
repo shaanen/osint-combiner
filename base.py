@@ -275,3 +275,9 @@ def check_outputfile(str_file_path):
     except FileNotFoundError:
         msg = 'Cannot create outputfile. Do all directories in outputfile path exist?'
         raise argparse.ArgumentTypeError(msg)
+
+
+def get_path_converted_output_file(str_path_input_file):
+    input_file = Path(str_path_input_file)
+    return increment_until_new_file('converted_outputfiles/' + os.path.splitext(os.path.basename(str(input_file)))[0]
+                                    + '-converted' + os.path.splitext(str(input_file))[1])
