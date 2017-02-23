@@ -278,6 +278,30 @@ def check_outputfile(str_file_path):
 
 
 def get_path_converted_output_file(str_path_input_file):
+    """Returns a path for converted outputfile"""
     input_file = Path(str_path_input_file)
     return increment_until_new_file('converted_outputfiles/' + os.path.splitext(os.path.basename(str(input_file)))[0]
                                     + '-converted' + os.path.splitext(str(input_file))[1])
+
+
+def convert_file(str_path_input_file, source_type):
+    """Converts given inputfile to outputfile"""
+    from shodanfunctions import shodan_to_es_convert
+    from censysfunctions import censys_to_es_convert
+    from ipinfofunctions import ipinfo_to_es_convert
+    str_path_output_file = get_path_converted_output_file(str_path_input_file)
+    with open(str_path_output_file, 'a', encoding='utf-8') as output_file:
+        input_file = Path(str_path_input_file)
+        for str_banner in input_file.open(encoding='utf-8'):
+            if str_banner != '\n':
+                banner = dict_clean_empty(json.loads(str_banner))
+                if source_type is 'shodan':
+                    shodan_to_es_convert(banner)
+                elif source_type is 'censys':
+                    censys_to_es_convert(banner)
+                elif source_type is 'ipinfo':
+                    ipinfo_to_es_convert(banner)
+                output_file.write(json.dumps(banner) + '\n')
+    print('Converted ' + str_path_input_file + ' to ' + str_path_output_file)
+
+

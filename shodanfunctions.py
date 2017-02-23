@@ -1,7 +1,6 @@
-from base import get_path_converted_output_file
 from base import dict_add_source_prefix
 from base import dict_clean_empty
-from pathlib import Path
+from base import convert_file
 import configparser
 import shodan
 import json
@@ -17,7 +16,7 @@ def get_new_shodan_api_object():
     return shodan.Shodan(key)
 
 
-def to_es_convert(input_dict):
+def shodan_to_es_convert(input_dict):
     """Returns dict ready to be used by the Elastic Stack."""
     try:
         # set ip and ip_int
@@ -126,20 +125,7 @@ def to_file_shodan(queries, path_output_file, should_convert):
 
     print(str(nr_total_results) + ' total results written in ' + path_output_file)
     if should_convert:
-        convert_file(path_output_file)
-
-
-def convert_file(str_path_input_file):
-    """Converts given inputfile to outputfile"""
-    str_path_output_file = get_path_converted_output_file(str_path_input_file)
-    with open(str_path_output_file, 'a') as output_file:
-        input_file = Path(str_path_input_file)
-        for str_banner in input_file.open():
-            if str_banner != '\n':
-                banner = dict_clean_empty(json.loads(str_banner))
-                to_es_convert(banner)
-                output_file.write(json.dumps(banner) + '\n')
-    print('Converted ' + str_path_input_file + ' to ' + str_path_output_file)
+        convert_file(path_output_file, 'shodan')
 
 
 def get_input_choice():

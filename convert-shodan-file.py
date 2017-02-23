@@ -4,7 +4,6 @@ from pathlib import Path
 from base import dict_clean_empty
 from base import create_output_directory
 from base import ask_continue
-from base import increment_until_new_file
 import argparse
 import json
 import sys
@@ -22,7 +21,7 @@ print('---Shodan converter---')
 
 # A file input
 if Path(args.input).is_file():
-    convert_file(args.input)
+    convert_file(args.input, 'shodan')
 
 # A directory input
 elif os.path.isdir(args.input):
@@ -45,7 +44,7 @@ elif os.path.isdir(args.input):
             for str_banner in open(input_directory + '/' + input_file, 'r'):
                 if str_banner != '\n':
                     banner = dict_clean_empty(json.loads(str_banner))
-                    to_es_convert(banner)
+                    shodan_to_es_convert(banner)
                     output_file.write(json.dumps(banner) + '\n')
     print('\nConverted files written in ' + output_directory)
 else:

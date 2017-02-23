@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from netaddr import core
 from base import *
-from pathlib import Path
 import threading
 import requests
 import json
@@ -152,7 +151,7 @@ def cidr_to_ipinfo(cidr_input, path_output_file, should_be_converted):
         for str_banner in result_list:
             banner = dict_clean_empty(json.loads(str_banner))
             if should_be_converted:
-                banner = to_es_convert(banner)
+                banner = ipinfo_to_es_convert(banner)
             output_file.write(json.dumps(banner) + '\n')
     if should_convert:
         print(str(len(result_list)) + ' results converted and written in ' + path_output_file)

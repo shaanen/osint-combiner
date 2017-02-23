@@ -11,7 +11,7 @@ import sys
 os.chdir(sys.path[0])
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-c", "--convert", help="Convert immediately without storing original file.", action="store_true")
+parser.add_argument("-c", "--convert", help="will also create a converted outputfile", action="store_true")
 parser.add_argument("-y", "--yes", "--assume-yes", help="Automatic yes to prompts; assume \"yes\" as answer to all "
                                                         "prompts and run non-interactively.", action="store_true")
 subparsers = parser.add_subparsers()

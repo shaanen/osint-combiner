@@ -29,7 +29,7 @@ if Path(args.input).is_file():
     with open(str_path_output_file, 'a') as output_file:
         for str_banner in input_file.open():
             banner = dict_clean_empty(json.loads(str_banner))
-            to_es_convert(banner)
+            ipinfo_to_es_convert(banner)
             output_file.write(json.dumps(banner) + '\n')
     print('Converted ' + str(input_file.as_posix()) + ' to ' + str_path_output_file)
 
@@ -54,7 +54,7 @@ elif os.path.isdir(args.input):
             for str_banner in open(input_directory + '/' + input_file, 'r'):
                 if str_banner != '\n':
                     banner = dict_clean_empty(json.loads(str_banner))
-                    to_es_convert(banner)
+                    ipinfo_to_es_convert(banner)
                     output_file.write(json.dumps(banner) + '\n')
     print('\nConverted files written in ' + output_directory)
 else:

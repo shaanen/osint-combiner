@@ -5,6 +5,7 @@ from netaddr import IPNetwork
 from base import dict_add_source_prefix
 from base import dict_clean_empty
 from base import ConcatJSONDecoder
+from base import convert_file
 import requests
 import json
 import sys
@@ -146,19 +147,17 @@ def to_file(query, str_path_output_file, should_convert):
             with open(str_path_output_file, 'a') as output_file:
                 for result in list_of_json:
                     result = dict_clean_empty(result)
-                    if should_convert:
-                        result = to_es_convert(result)
                     output_file.write(json.dumps(result) + '\n')
             total_results += len(list_of_json)
+
+        print(str(total_results) + ' total results written in ', str_path_output_file)
         if should_convert:
-            print('Converted and appended ' + str(total_results) + ' query results to ', str_path_output_file)
-        else:
-            print('Appended ' + str(total_results) + ' query results to ', str_path_output_file)
+            convert_file(str_path_output_file, 'censys')
     else:
         print('Censys job failed.' + '\n' + str(result))
 
 
-def to_es_convert(input_dict):
+def censys_to_es_convert(input_dict):
     """Returns dict ready to be used by the Elastic Stack."""
     try:
         # convert ip_int to ipint
@@ -229,5 +228,3 @@ def __limit_nr_of_elements(input_dict):
     except KeyError:
         pass
     return input_dict
-
-
