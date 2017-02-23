@@ -1,9 +1,6 @@
 #!/usr/bin/env python
-from netaddr import IPNetwork
 from netaddr import core
-from base import parse_all_cidrs_from_file
-from base import exists_es_index
-from base import es_get_all_ips
+from base import *
 from pathlib import Path
 import threading
 import requests
@@ -54,9 +51,9 @@ elastic_index.add_argument('outputfile', help='The file where the results will b
 elastic_index.set_defaults(subparser='elastic-index')
 
 args = parser.parse_args()
-choice = args.subparser
+choice = get_input_choice(args)
+check_outputfile(args.outputfile)
 should_convert = args.convert
-str_path_output_file = args.outputfile
 
 
 # Threading class for one GET request
@@ -169,12 +166,10 @@ if choice is 'cidr':
     except core.AddrFormatError:
         msg = "{0} is not a valid IP or CIDR".format(args.inputfile)
         raise argparse.ArgumentTypeError(msg)
-    cidr_to_ipinfo(cidr, str_path_output_file, should_convert)
+    cidr_to_ipinfo(cidr, args.outputfile, should_convert)
 # 2= CIDR file input
 elif choice is 'cidrfile':
-    if not Path(args.inputfile).is_file():
-        msg = "{0} is not an existing file".format(args.inputfile)
-        raise argparse.ArgumentTypeError(msg)
+    check_exists_input_file(args.inputfile)
     cidrs = parse_all_cidrs_from_file(args.inputfile, should_convert)
     print(cidrs, sep='\n')
     all_cidrs_are_just_one_ip = True
@@ -183,14 +178,14 @@ elif choice is 'cidrfile':
             all_cidrs_are_just_one_ip = False
     # list of only single IPs
     if all_cidrs_are_just_one_ip:
-        cidr_to_ipinfo(cidrs, str_path_output_file, should_convert)
+        cidr_to_ipinfo(cidrs, args.outputfile, should_convert)
     # list contains 1 or more CIDRS
     else:
         count = 0
         for cidr in cidrs:
             count += 1
             print('--Starting with CIDR: ' + cidr + ' (' + (str(count)) + '/' + str(len(cidrs)) + ')--')
-            cidr_to_ipinfo(IPNetwork(cidr), str_path_output_file, should_convert)
+            cidr_to_ipinfo(IPNetwork(cidr), args.outputfile, should_convert)
             exit_flag = 0
 # 3= Elasticsearch input
 elif choice is 'elastic-index':
@@ -198,4 +193,4 @@ elif choice is 'elastic-index':
         msg = "{0} is not an existing Elasticsearch index".format(args.inputfile)
         raise argparse.ArgumentTypeError(msg)
     list_of_ips = es_get_all_ips(args.index)
-    cidr_to_ipinfo(list_of_ips, str_path_output_file, should_convert)
+    cidr_to_ipinfo(list_of_ips, args.outputfile, should_convert)

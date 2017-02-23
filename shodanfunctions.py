@@ -119,7 +119,6 @@ def to_file_shodan(queries, path_output_file, should_convert):
         with open(path_output_file, "a") as output_file:
             print(path_output_file)
             for banner in results:
-                print(banner)
                 output_file.write(banner)
         print('\r' + str(len(results)) + ' results written.')
         nr_total_results += len(results)

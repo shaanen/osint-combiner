@@ -39,13 +39,5 @@ def to_es_convert(input_dict):
     return input_dict
 
 
-def get_input_choice():
-    """Returns input_choice represented as integer"""
-    items = ['1', '2', '3']
-    input_choice = '0'
-    while input_choice not in items:
-        input_choice = input("Console input[1], CIDR file input[2] or Elasticsearch input[3]?")
-    return int(input_choice)
-
 
 

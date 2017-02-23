@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 from censysfunctions import *
-from base import parse_all_cidrs_from_file
-from base import get_organizations_from_csv
-from base import ask_continue
-from base import get_queries_per_line_from_file
-from pathlib import Path
+from base import *
 import threading
 import time
 import queue
@@ -37,8 +33,8 @@ csv.add_argument("inputfile", help="the input file")
 csv.set_defaults(subparser='csvfile')
 
 args = parser.parse_args()
-choice = args.subparser
-
+choice = get_input_choice(args)
+check_exists_input_file(args.inputfile)
 should_convert = args.convert
 exit_flag = 0
 nr_threads = 4
@@ -111,30 +107,28 @@ def to_file_organizations():
     for t in threads:
         t.join()
 
-if Path(args.inputfile).is_file():
-    # query file input, single threaded
-    if choice is 'queryfile':
-        queries = get_queries_per_line_from_file(args.inputfile)
-        print('The following Censys queries will be executed:')
-        print("\n".join(queries))
-        if not args.yes:
-            ask_continue()
-        for query in queries:
-            print(prepare_custom_query(query))
-        to_file(prepare_custom_query(query), args.outputfile, should_convert)
-    # CIDR file input, single threaded
-    elif choice is 'cidrfile':
-        set_cidrs = parse_all_cidrs_from_file(str(args.inputfile), args.yes)
-        query = prepare_cidrs_query(set_cidrs)
-        to_file(query, args.outputfile, should_convert)
-    # CSV file input, multi threaded
-    elif choice is 'csvfile':
-        organizations = get_organizations_from_csv(args.inputfile)
-        print(organizations.keys())
-        print(str(len(organizations)) + ' organizations found.')
-        if not args.yes:
-            ask_continue()
-        to_file_organizations()
-else:
-    msg = "{0} is not an existing file".format(args.inputfile)
-    raise argparse.ArgumentTypeError(msg)
+# query file input, single threaded
+if choice is 'queryfile':
+    check_outputfile(args.outputfile)
+    queries = get_queries_per_line_from_file(args.inputfile)
+    print('The following Censys queries will be executed:')
+    print("\n".join(queries))
+    if not args.yes:
+        ask_continue()
+    for query in queries:
+        print(prepare_custom_query(query))
+    to_file(prepare_custom_query(query), args.outputfile, should_convert)
+# CIDR file input, single threaded
+elif choice is 'cidrfile':
+    check_outputfile(args.outputfile)
+    set_cidrs = parse_all_cidrs_from_file(str(args.inputfile), args.yes)
+    query = prepare_cidrs_query(set_cidrs)
+    to_file(query, args.outputfile, should_convert)
+# CSV file input, multi threaded
+elif choice is 'csvfile':
+    organizations = get_organizations_from_csv(args.inputfile)
+    print(organizations.keys())
+    print(str(len(organizations)) + ' organizations found.')
+    if not args.yes:
+        ask_continue()
+    to_file_organizations()

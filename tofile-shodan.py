@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 from shodanfunctions import *
-from base import get_queries_per_line_from_file
-from base import get_organizations_from_csv
-from base import parse_all_cidrs_from_file
-from base import ask_continue
-from pathlib import Path
+from base import *
 import argparse
 import os
 import sys
@@ -33,40 +29,37 @@ csv.add_argument("inputfile", help="the input file")
 csv.set_defaults(subparser='csvfile')
 
 args = parser.parse_args()
-choice = args.subparser
+choice = get_input_choice(args)
+check_exists_input_file(args.inputfile)
+check_outputfile(args.outputfile)
+should_convert = args.convert
 
-if Path(args.inputfile).is_file():
-    should_convert = args.convert
-    queries = set()
-    # CIDR file input
-    if choice is 'cidrfile':
-        queries = ['net:' + s for s in parse_all_cidrs_from_file(args.inputfile, args.yes)]
-        to_file_shodan(queries, args.outputfile, should_convert)
-    # query file input
-    elif choice is 'queryfile':
-        queries = get_queries_per_line_from_file(args.inputfile)
-        print('The following Shodan queries will be executed:')
-        print("\n".join(queries))
-        if not args.yes:
-            ask_continue()
-        to_file_shodan(queries, args.outputfile, should_convert)
-    # CSV file input
-    elif choice is 'csvfile':
-        organizations = get_organizations_from_csv(args.inputfile)
-        print(organizations.keys())
-        print(str(len(organizations)) + ' organizations found.')
-        if not args.yes:
-            ask_continue()
-        count = 0
-        for name, cidrs in organizations.items():
-            count += 1
-            queries = ['net:' + s for s in cidrs]
-            print(name + ' [' + str(count) + '/' + str(len(organizations)) + ']...')
-            if should_convert:
-                str_path_output_file = 'outputfiles/shodan/shodan-' + name + '-converted.json'
-            else:
-                str_path_output_file = 'outputfiles/shodan/shodan-' + name + '.json'
-            to_file_shodan(queries, str_path_output_file, should_convert)
-else:
-    msg = "{0} is not an existing file".format(args.inputfile)
-    raise argparse.ArgumentTypeError(msg)
+# CIDR file input
+if choice is 'cidrfile':
+    queries = ['net:' + s for s in parse_all_cidrs_from_file(args.inputfile, args.yes)]
+    to_file_shodan(queries, args.outputfile, should_convert)
+# query file input
+elif choice is 'queryfile':
+    queries = get_queries_per_line_from_file(args.inputfile)
+    print('The following Shodan queries will be executed:')
+    print("\n".join(queries))
+    if not args.yes:
+        ask_continue()
+    to_file_shodan(queries, args.outputfile, should_convert)
+# CSV file input
+elif choice is 'csvfile':
+    organizations = get_organizations_from_csv(args.inputfile)
+    print(organizations.keys())
+    print(str(len(organizations)) + ' organizations found.')
+    if not args.yes:
+        ask_continue()
+    count = 0
+    for name, cidrs in organizations.items():
+        count += 1
+        queries = ['net:' + s for s in cidrs]
+        print(name + ' [' + str(count) + '/' + str(len(organizations)) + ']...')
+        if should_convert:
+            str_path_output_file = 'outputfiles/shodan/shodan-' + name + '-converted.json'
+        else:
+            str_path_output_file = 'outputfiles/shodan/shodan-' + name + '.json'
+        to_file_shodan(queries, str_path_output_file, should_convert)

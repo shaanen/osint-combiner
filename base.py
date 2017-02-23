@@ -4,6 +4,7 @@ from elasticsearch import exceptions
 from collections import defaultdict
 from pathlib import Path
 import configparser
+import argparse
 import string
 import json
 import sys
@@ -249,3 +250,28 @@ def get_queries_per_line_from_file(str_path_input_file):
     """Returns list of queries as string, without any blank lines"""
     with open(str_path_input_file) as f_in:
         return list(filter(None, (line.rstrip() for line in f_in)))
+
+
+def check_exists_input_file(str_file_path):
+    """Checks if input file exists"""
+    if not Path(str_file_path).is_file():
+        msg = "{0} is not an existing file".format(str_file_path)
+        raise argparse.ArgumentTypeError(msg)
+
+
+def get_input_choice(args):
+    """Check if an input choice is given"""
+    try:
+        return args.subparser
+    except AttributeError:
+        msg = 'Missing input choice.'
+        raise argparse.ArgumentTypeError(msg)
+
+
+def check_outputfile(str_file_path):
+    """Check if output file can be created"""
+    try:
+        open(str_file_path, "a")
+    except FileNotFoundError:
+        msg = 'Cannot create outputfile. Do all directories in outputfile path exist?'
+        raise argparse.ArgumentTypeError(msg)
