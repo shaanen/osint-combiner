@@ -294,14 +294,18 @@ def convert_file(str_path_input_file, source_type):
         input_file = Path(str_path_input_file)
         for str_banner in input_file.open(encoding='utf-8'):
             if str_banner != '\n':
-                banner = dict_clean_empty(json.loads(str_banner))
-                if source_type is 'shodan':
-                    shodan_to_es_convert(banner)
-                elif source_type is 'censys':
-                    censys_to_es_convert(banner)
-                elif source_type is 'ipinfo':
-                    ipinfo_to_es_convert(banner)
-                output_file.write(json.dumps(banner) + '\n')
+                try:
+                    banner = dict_clean_empty(json.loads(str_banner))
+                    if source_type is 'shodan':
+                        shodan_to_es_convert(banner)
+                    elif source_type is 'censys':
+                        censys_to_es_convert(banner)
+                    elif source_type is 'ipinfo':
+                        ipinfo_to_es_convert(banner)
+                    output_file.write(json.dumps(banner) + '\n')
+                except json.decoder.JSONDecodeError as e:
+                    print(e.args)
+                    print(str_banner)
     print('Converted ' + str_path_input_file + ' to ' + str_path_output_file)
 
 
