@@ -305,7 +305,7 @@ def convert_file(str_path_input_file, source_type):
                     output_file.write(json.dumps(banner) + '\n')
                 except json.decoder.JSONDecodeError as e:
                     print(e.args)
-                    print(str_banner)
+                    print('Malformed json: ' + str_banner)
     print('Converted ' + str_path_input_file + ' to ' + str_path_output_file)
 
 

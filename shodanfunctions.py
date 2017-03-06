@@ -45,11 +45,11 @@ def shodan_to_es_convert(input_dict):
     except (KeyError, TypeError):
         pass
     # if present, convert opts.bitcoin.handshake.nonce' to string
-    try:
-        input_dict['opts']['bitcoin']['handshake'][0]['nonce'] = \
-            str(input_dict['opts']['bitcoin']['handshake'][0]['nonce'])
-    except (KeyError, TypeError):
-        pass
+    # try:
+    #     input_dict['opts']['bitcoin']['handshake'][0]['nonce'] = \
+    #         str(input_dict['opts']['bitcoin']['handshake'][0]['nonce'])
+    # except (KeyError, TypeError):
+    #     pass
 
     try:
         # rename_shodan.modules to protocols (used as prefix per banner for combining multiple banners into 1 IP)
@@ -96,6 +96,11 @@ def limit_nr_of_elements(input_dict):
     try:
         input_dict['elastic'] = str(
             input_dict['elastic'])
+    except KeyError:
+        pass
+    try:
+        input_dict['opts']['minecraft'] = str(
+            input_dict['opts']['minecraft'])
     except KeyError:
         pass
     return input_dict
