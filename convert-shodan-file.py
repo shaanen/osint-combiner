@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from timetracker import TimeTracker
 from shodanfunctions import *
 from pathlib import Path
 from base import dict_clean_empty
@@ -18,6 +19,7 @@ parser.add_argument("-y", "--yes", "--assume-yes", help="Automatic yes to prompt
 args = parser.parse_args()
 
 print('---Shodan converter---')
+t = TimeTracker()
 
 # A file input
 if Path(args.input).is_file():
@@ -50,3 +52,4 @@ elif os.path.isdir(args.input):
 else:
     msg = "{0} is not an existing file or directory".format(args.input)
     raise argparse.ArgumentTypeError(msg)
+t.print_statistics()

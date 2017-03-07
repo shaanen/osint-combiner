@@ -1,17 +1,17 @@
 #!/usr/bin/env python
+from datetime import datetime, timezone
+from timetracker import TimeTracker
+from ipinfofunctions import *
 from netaddr import core
 from base import *
 import threading
 import requests
-import json
-from datetime import datetime, timezone
-import time
-import os
-import queue
 import argparse
-from ipinfofunctions import *
-from base import dict_clean_empty
+import json
+import time
+import queue
 import sys
+import os
 
 os.chdir(sys.path[0])
 
@@ -53,6 +53,7 @@ args = parser.parse_args()
 choice = get_input_choice(args)
 check_outputfile(args.outputfile)
 should_convert = args.convert
+t = TimeTracker()
 
 
 # Threading class for one GET request
@@ -193,3 +194,4 @@ elif choice is 'elastic-index':
         raise argparse.ArgumentTypeError(msg)
     list_of_ips = es_get_all_ips(args.index)
     cidr_to_ipinfo(list_of_ips, args.outputfile, should_convert)
+t.print_statistics()

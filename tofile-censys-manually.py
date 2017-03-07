@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-from censysfunctions import *
-from base import ask_output_file
-from base import get_user_boolean
 from base import get_cidr_from_user_input
-import os
+from timetracker import TimeTracker
+from base import get_user_boolean
+from base import ask_output_file
+from censysfunctions import *
 import sys
+import os
 
 os.chdir(sys.path[0])
 
@@ -12,6 +13,7 @@ os.chdir(sys.path[0])
 str_path_output_file = ask_output_file('outputfiles/censys/')
 should_convert = get_user_boolean('Also convert to es? y/n')
 choice = get_input_choice()
+t = TimeTracker()
 
 # Console CIDR input
 if choice is 1:
@@ -27,3 +29,4 @@ elif choice is 2:
 elif choice is 3:
     query = prepare_custom_query(sql_get_custom_query_from_user())
     to_file(query, str_path_output_file, should_convert)
+t.print_statistics()

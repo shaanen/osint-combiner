@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from timetracker import TimeTracker
 from censysfunctions import *
 from base import *
 import threading
@@ -41,6 +42,7 @@ nr_threads = 4
 work_queue = queue.Queue(0)
 threads = []
 queue_lock = threading.Lock()
+t = TimeTracker()
 
 
 # Threading class for one GET request
@@ -132,3 +134,4 @@ elif choice is 'csvfile':
     if not args.yes:
         ask_continue()
     to_file_organizations()
+t.print_statistics()

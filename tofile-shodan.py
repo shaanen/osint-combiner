@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from timetracker import TimeTracker
 from shodanfunctions import *
 from base import *
 import argparse
@@ -32,6 +33,7 @@ args = parser.parse_args()
 choice = get_input_choice(args)
 check_exists_input_file(args.inputfile)
 should_convert = args.convert
+t = TimeTracker()
 
 # CIDR file input
 if choice is 'cidrfile':
@@ -61,3 +63,4 @@ elif choice is 'csvfile':
         print(name + ' [' + str(count) + '/' + str(len(organizations)) + ']...')
         str_path_output_file = 'outputfiles/shodan/shodan-' + name + '.json'
         to_file_shodan(queries, str_path_output_file, should_convert)
+t.print_statistics()

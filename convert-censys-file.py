@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
+from base import create_output_directory
+from timetracker import TimeTracker
+from base import ask_continue
 from censysfunctions import *
 from pathlib import Path
-from base import dict_clean_empty
-from base import increment_until_new_file
-from base import create_output_directory
-from base import ask_continue
 import argparse
 import json
 import sys
@@ -19,6 +18,7 @@ parser.add_argument("-y", "--yes", "--assume-yes", help="Automatic yes to prompt
 args = parser.parse_args()
 
 print('---Censys converter---')
+t = TimeTracker()
 
 # A file input
 if Path(args.input).is_file():
@@ -51,3 +51,4 @@ elif os.path.isdir(args.input):
 else:
     msg = "{0} is not an existing file or directory".format(args.input)
     raise argparse.ArgumentTypeError(msg)
+t.print_statistics()
