@@ -55,7 +55,7 @@ def shodan_to_es_convert(input_dict):
         # rename_shodan.modules to protocols (used as prefix per banner for combining multiple banners into 1 IP)
         input_dict['protocols'] = input_dict['_shodan']['module']
         # the rest of the data in _shodan is irrelevant
-        del input_dict['_shodan']
+        #del input_dict['_shodan']
     except KeyError:
         pass
     # asn to int
