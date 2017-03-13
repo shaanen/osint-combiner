@@ -44,7 +44,10 @@ cidrfile.add_argument("inputfile", help="the input file")
 cidrfile.add_argument('outputfile', help='The file where the results will be stored.')
 cidrfile.set_defaults(subparser='cidrfile')
 
-elastic_index = subparsers.add_parser('elastic-index', help='Existing Elasticsearch index as input')
+elastic_index = subparsers.add_parser('elastic-index', help='Existing Elasticsearch index as input. Takes all the '
+                                                            'distinct IP adresses from given Elasticsearch index. '
+                                                            'Fastest and best option for IpInfo, because it will only '
+                                                            'query IpInfo for IPs used by real network devices.')
 elastic_index.add_argument('index', help='The Elasticsearch index.')
 elastic_index.add_argument('outputfile', help='The file where the results will be stored.')
 elastic_index.set_defaults(subparser='elastic-index')
@@ -73,8 +76,12 @@ class GetIpInfoThread (threading.Thread):
                 self.data = self.q.get()
                 queueLock.release()
                 got_valid_response = False
+                failed_count = 0
                 while not got_valid_response:
+                    resp = ''
                     try:
+                        if failed_count > 10:
+                            got_valid_response = True
                         resp = requests.post(url, headers=headers, data=str(self.data), timeout=20)
                         resp_json = json.loads(resp.text)
                         resp_json['timestamp'] = str(datetime.now(timezone.utc).isoformat())
@@ -85,9 +92,16 @@ class GetIpInfoThread (threading.Thread):
                     except requests.exceptions.ConnectionError:
                         with connection_err_lock:
                             conn_err_counter += 1
+                            failed_count += 1
                     except requests.exceptions.ReadTimeout:
                         with timeout_err_lock:
                             timeout_err_counter += 1
+                            failed_count += 1
+                    except json.decoder.JSONDecodeError as e:
+                        print(str(e))
+                        print('Malformed json:' + str(resp))
+                        print('Failed IP:' + str(self.data))
+                        failed_count += 1
                     finally:
                         print('\r' + str(done_counter) + ' done, ' + str(conn_err_counter) + ' connection errors, '
                               + str(timeout_err_counter) + ' timeouts', end='')
