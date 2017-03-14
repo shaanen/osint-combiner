@@ -15,8 +15,8 @@ import os
 
 os.chdir(sys.path[0])
 
-url = 'http://ipinfo.dutchsec.nl/submit'
-headers = {'Content-Type': 'text/plain', 'Accept': 'text/json'}
+url = 'https://k8s.dutchsec.nl/submit'
+headers = {'Content-Type': 'text/plain', 'Accept': 'text/json', 'Host': 'ipinfo.dutchsec.nl'}
 result_list = []
 done_counter = 0
 done_counter_lock = threading.Lock()
@@ -82,14 +82,15 @@ class GetIpInfoThread (threading.Thread):
                     try:
                         if failed_count > 10:
                             got_valid_response = True
-                        resp = requests.post(url, headers=headers, data=str(self.data), timeout=20)
+                        resp = requests.post(url, headers=headers, data=str(self.data), timeout=20, verify=False)
                         resp_json = json.loads(resp.text)
                         resp_json['timestamp'] = str(datetime.now(timezone.utc).isoformat())
                         result_list.append(json.dumps(resp_json))
                         got_valid_response = True
                         with done_counter_lock:
                             done_counter += 1
-                    except requests.exceptions.ConnectionError:
+                    except requests.exceptions.ConnectionError as e:
+                        print(e)
                         with connection_err_lock:
                             conn_err_counter += 1
                             failed_count += 1
