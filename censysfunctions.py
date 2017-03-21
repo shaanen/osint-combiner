@@ -17,8 +17,8 @@ def new_api_obj(str_type):
     """Returns initialised Censys SQL query API object"""
     config = configparser.ConfigParser()
     config.read(os.path.dirname(os.path.realpath(__file__)) + "/config.ini")
-    censys_id = (config['SectionOne']['CENSYS_API_ID'])
-    censys_key = (config['SectionOne']['CENSYS_API_KEY'])
+    censys_id = (config['osint_sources']['CENSYS_API_ID'])
+    censys_key = (config['osint_sources']['CENSYS_API_KEY'])
     if str_type == 'SQL_QUERY':
         return censys.query.CensysQuery(api_id=censys_id, api_secret=censys_key)
     elif str_type == 'SQL_EXPORT':

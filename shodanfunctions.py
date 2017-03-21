@@ -12,7 +12,7 @@ def get_new_shodan_api_object():
     """Returns initialised Shodan API object"""
     config = configparser.ConfigParser()
     config.read(os.path.dirname(os.path.realpath(__file__)) + "/config.ini")
-    key = (config['SectionOne']['SHODAN_API_KEY'])
+    key = (config['osint_sources']['SHODAN_API_KEY'])
     return shodan.Shodan(key)
 
 

@@ -19,15 +19,24 @@ Currently supported OSINT sources:
 + Project needs a text file named "config.ini" with the following content:
 
 ```
-[SectionOne]
+[osint_sources]
 
-ELASTICSEARCH_IP: *{IP of Elasticsearch cluster here}*
-
-SHODANAPIKEY: *{Shodan API key here}*
+SHODAN_API_KEY: *{Shodan API key here}*
 
 CENSYS_API_ID: *{Censys API ID here}* 
 
 CENSYS_API_KEY: *{Censys Secret here}*
+
+[elastic]
+
+ELASTICSEARCH_IP: *{IP of Elasticsearch cluster here}*
+
+X-PACK_ENABLED: *{Whether X-PACK is enabled (true/false}*
+
+X-PACK_USERNAME: *{(optional) X-PACK SHIELD username here}*
+
+X-PACK_PASSWORD: *{(optional) X-PACK SHIELD password here}*
+
 ```
 
 + The Python3 scripts need the following modules (can be installed with easy_install3 or pip3): 
