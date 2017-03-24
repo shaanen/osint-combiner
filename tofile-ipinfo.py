@@ -15,8 +15,8 @@ import os
 
 os.chdir(sys.path[0])
 
-url = 'http://ipinfo.dutchsec.nl/submit'
-headers = {'Content-Type': 'text/plain', 'Accept': 'text/json'}
+url = 'https://k8s.dutchsec.nl/submit'
+headers = {'Content-Type': 'text/plain', 'Accept': 'text/json', 'Host': 'ipinfo.dutchsec.nl'}
 result_list = []
 done_counter = 0
 done_counter_lock = threading.Lock()
@@ -44,7 +44,10 @@ cidrfile.add_argument("inputfile", help="the input file")
 cidrfile.add_argument('outputfile', help='The file where the results will be stored.')
 cidrfile.set_defaults(subparser='cidrfile')
 
-elastic_index = subparsers.add_parser('elastic-index', help='Existing Elasticsearch index as input')
+elastic_index = subparsers.add_parser('elastic-index', help='Existing Elasticsearch index as input. Takes all the '
+                                                            'distinct IP adresses from given Elasticsearch index. '
+                                                            'Fastest and best option for IpInfo, because it will only '
+                                                            'query IpInfo for IPs used by real network devices.')
 elastic_index.add_argument('index', help='The Elasticsearch index.')
 elastic_index.add_argument('outputfile', help='The file where the results will be stored.')
 elastic_index.set_defaults(subparser='elastic-index')
@@ -73,21 +76,33 @@ class GetIpInfoThread (threading.Thread):
                 self.data = self.q.get()
                 queueLock.release()
                 got_valid_response = False
+                failed_count = 0
                 while not got_valid_response:
+                    resp = ''
                     try:
-                        resp = requests.post(url, headers=headers, data=str(self.data), timeout=20)
+                        if failed_count > 10:
+                            got_valid_response = True
+                        resp = requests.post(url, headers=headers, data=str(self.data), timeout=20, verify=False)
                         resp_json = json.loads(resp.text)
                         resp_json['timestamp'] = str(datetime.now(timezone.utc).isoformat())
                         result_list.append(json.dumps(resp_json))
                         got_valid_response = True
                         with done_counter_lock:
                             done_counter += 1
-                    except requests.exceptions.ConnectionError:
+                    except requests.exceptions.ConnectionError as e:
+                        print(e)
                         with connection_err_lock:
                             conn_err_counter += 1
+                            failed_count += 1
                     except requests.exceptions.ReadTimeout:
                         with timeout_err_lock:
                             timeout_err_counter += 1
+                            failed_count += 1
+                    except json.decoder.JSONDecodeError as e:
+                        print(str(e))
+                        print('Malformed json:' + str(resp))
+                        print('Failed IP:' + str(self.data))
+                        failed_count += 1
                     finally:
                         print('\r' + str(done_counter) + ' done, ' + str(conn_err_counter) + ' connection errors, '
                               + str(timeout_err_counter) + ' timeouts', end='')

@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/vulnerabilityfinder.iml" filepath="$PROJECT_DIR$/.idea/vulnerabilityfinder.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/osint-combiner.iml" filepath="$PROJECT_DIR$/.idea/osint-combiner.iml" />
     </modules>
   </component>
 </project>

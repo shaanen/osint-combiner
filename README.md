@@ -1,4 +1,4 @@
-# vulnerabilityfinder
+# OSINT Combiner
 Combining OSINT sources in Elastic Stack
 
 This project contains: 
@@ -19,15 +19,24 @@ Currently supported OSINT sources:
 + Project needs a text file named "config.ini" with the following content:
 
 ```
-[SectionOne]
+[osint_sources]
 
-ELASTICSEARCH_IP: *{IP of Elasticsearch cluster here}*
-
-SHODANAPIKEY: *{Shodan API key here}*
+SHODAN_API_KEY: *{Shodan API key here}*
 
 CENSYS_API_ID: *{Censys API ID here}* 
 
 CENSYS_API_KEY: *{Censys Secret here}*
+
+[elastic]
+
+ELASTICSEARCH_IP: *{IP of Elasticsearch cluster here}*
+
+X-PACK_ENABLED: *{Whether X-PACK is enabled (true/false}*
+
+X-PACK_USERNAME: *{(optional) X-PACK SHIELD username here}*
+
+X-PACK_PASSWORD: *{(optional) X-PACK SHIELD password here}*
+
 ```
 
 + The Python3 scripts need the following modules (can be installed with easy_install3 or pip3): 
@@ -37,14 +46,12 @@ CENSYS_API_KEY: *{Censys Secret here}*
   + Netaddr
   
 ## How to use
-When running a tofile-\*.py script, it will ask a for choice in user input:
- + Various query options directly via the console input;
- + CIDR file input: which parses all CIDRs from a given text file;
- + CSV file input: which parses names of organizations (column 1) with the corresponding CIDR (column 2). Can take multiple CIDRs per organization, where each CIDR is on a separate row. Will create an outputfile per organization;
- + Elasticsearch index input (for IpInfo): Takes all the distinct IP adresses from given Elasticsearch index. Fastest and best option for IpInfo, because it will only query IpInfo for IPs used by real network devices. Shodan and/or Censys did already do the device discovery, so let IpInfo only query the IPs which are found by those sources. Quering IpInfo with large CIDRs will take ages, and probably most IPs in such CIDR are not used by a device anyway.
+You can run the following scripts:
+ + tofile-\*.py files take arguments and can be runned automatically, for example with a CRON job. Run with the '-h' flag for more info;
+ + tofile-\*-manually.py files will ask for user input interactively;
+ + convert-\*.py files can convert the resulting files from tofile-\*.py to Elasticsearch compatible files, if not already converted with the '-c' flag from tofile-\*.py;
+ + Scripts in debugscripts/ can be used for debugging purposes.
 
-The scripts will ask if the results should be converted to the Elasticsearch format immediately. If you choose not to, you can convert the resulting files at a later time with the convert-\*-file.py scripts. Regardless of this choice, the scripts will always remove empty fields from the results, so the outputfiles will be much smaller in size.
-
-The \*.conf files are Logstash configuration files which you need to edit so the config will point to the right files and Elasticsearch index. 
+The \*.conf files are Logstash configuration files which you need to edit so the config will point to the right files and Elasticsearch index.
 
 Elasticsearch needs a specific mapping to import the data from the scripts. Use the mapping in the [Wiki](https://github.com/sjorsng/vulnerabilityfinder/wiki#required-elasticsearch-mapping-for-indexes "The Github Wiki of this project"). 
