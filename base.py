@@ -57,6 +57,20 @@ def es_get_ips_by_query(str_existing_index):
     return list_ips
 
 
+def es_get_all(str_existing_index):
+    """Returns all documents stored in given Elasticsearch index"""
+    documents = []
+    es = Elasticsearch(([{'host': get_es_cluster_ip()}]))
+    count = es.count(index=str_existing_index)['count']
+    res = es.search(index=str_existing_index,
+                    body={"size": 0, "query": "match_all"})
+    for key in res['aggregations']['all_ip']['buckets']:
+        documents.append(key['key'])
+    print('Found ' + str(len(documents)) + ' IPs in Elasticsearch index ' + str_existing_index)
+    ask_continue()
+    return documents
+
+
 def exists_es_index(str_valid_index):
     """Returns if given index string exists in ElasticSearch cluster"""
     connection_attempts = 0
