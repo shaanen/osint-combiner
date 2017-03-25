@@ -63,9 +63,9 @@ def es_get_all(str_existing_index):
     es = Elasticsearch(([{'host': get_es_cluster_ip()}]))
     count = es.count(index=str_existing_index)['count']
     res = es.search(index=str_existing_index,
-                    body={"size": 0, "query": "match_all"})
-    for key in res['aggregations']['all_ip']['buckets']:
-        documents.append(key['key'])
+                    body={"query": { "match_all": {}}, "size": count})
+    for key in res['hits']['hits']:
+        documents.append(key)
     print('Found ' + str(len(documents)) + ' IPs in Elasticsearch index ' + str_existing_index)
     ask_continue()
     return documents
