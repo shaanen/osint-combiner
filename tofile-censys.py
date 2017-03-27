@@ -118,8 +118,7 @@ if choice is 'queryfile':
     if not args.yes:
         ask_continue()
     for query in queries:
-        print(prepare_custom_query(query))
-    to_file(prepare_custom_query(query), args.outputfile, should_convert)
+        to_file(prepare_custom_query(query), args.outputfile, should_convert)
 # CIDR file input, single threaded
 elif choice is 'cidrfile':
     check_outputfile(args.outputfile)
