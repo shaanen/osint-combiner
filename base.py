@@ -26,10 +26,26 @@ def get_xpack_credentials():
     return config['elastic']['X-PACK_USERNAME'], config['elastic']['X-PACK_PASSWORD']
 
 
+def xpack_enabled():
+    """Returns whether x-pack is enabled from config.ini"""
+    config = configparser.ConfigParser()
+    config.read(os.path.dirname(os.path.realpath(__file__)) + "/config.ini")
+    return config['elastic']['X-PACK_ENABLED']
+
+
+def get_es_object():
+    """Returns Elasticsearch object"""
+    if xpack_enabled():
+        credentials = get_xpack_credentials()
+        return Elasticsearch([get_es_cluster_ip()], http_auth=(credentials[0], credentials[1]))
+    else:
+        return Elasticsearch(([{'host': get_es_cluster_ip()}]))
+
+
 def es_get_all_ips(str_existing_index):
     """Returns list of list_of_ips stored in given Elasticsearch index"""
     list_ips = []
-    es = Elasticsearch(([{'host': get_es_cluster_ip()}]))
+    es = get_es_object()
     count = es.count(index=str_existing_index)['count']
     res = es.search(index=str_existing_index,
                     body={"size": 0, "aggs": {"all_ip": {"terms": {"field": "ip", "size": count}}}})
@@ -45,7 +61,7 @@ def es_get_ips_by_query(str_existing_index):
     The query body in this function needs to be edited hardcoded.
     """
     list_ips = []
-    es = Elasticsearch(([{'host': get_es_cluster_ip()}]))
+    es = get_es_object()
     count = es.count(index=str_existing_index)['count']
     res = es.search(index=str_existing_index,
                     body={"size": 0, "aggs": {"ips_by_query": {"terms": {"field": "ip", "size": count}}}, "query":
@@ -60,7 +76,7 @@ def es_get_ips_by_query(str_existing_index):
 def es_get_all(str_existing_index):
     """Returns all documents stored in given Elasticsearch index"""
     documents = []
-    es = Elasticsearch(([{'host': get_es_cluster_ip()}]))
+    es = get_es_object()
     count = es.count(index=str_existing_index)['count']
     res = es.search(index=str_existing_index,
                     body={"query": { "match_all": {}}, "size": count})
@@ -72,11 +88,11 @@ def es_get_all(str_existing_index):
 
 
 def exists_es_index(str_valid_index):
-    """Returns if given index string exists in ElasticSearch cluster"""
+    """Returns if given index exists in Elasticsearch cluster"""
     connection_attempts = 0
     while connection_attempts < 3:
         try:
-            es = Elasticsearch(([{'host': get_es_cluster_ip()}]))
+            es = get_es_object()
             es_indices = es.indices
             return es_indices.exists(index=str_valid_index)
         except exceptions.ConnectionTimeout:
