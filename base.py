@@ -235,10 +235,12 @@ def get_organizations_from_csv(str_path_csv_file):
     f = open(str_path_csv_file, 'r')
     for line in f:
         line = line.split(',')
-        if line[0] not in list_organizations:
-            list_organizations[line[0]] = [line[1]]
+        org_name = line[0]
+        cidr = IPNetwork(line[1])
+        if org_name not in list_organizations:
+            list_organizations[org_name] = [cidr]
         else:
-            list_organizations[line[0]].append(line[1])
+            list_organizations[org_name].append(cidr)
     return list_organizations
 
 
