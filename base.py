@@ -1,7 +1,7 @@
 from netaddr import IPNetwork, AddrFormatError
 from elasticsearch import Elasticsearch
 from elasticsearch import exceptions
-from collections import defaultdict
+from collections import OrderedDict
 from pathlib import Path
 import configparser
 import argparse
@@ -210,7 +210,7 @@ def ask_input_directory():
 
 
 def ask_output_file(str_prefix_output_file):
-    """Returns valid file path string for new file from user input """
+    """Returns valid file path string for new file from user input"""
     str_name_output_file = ''
     while not is_valid_file_name(str_name_output_file):
         str_name_output_file = input('Output file:' + str_prefix_output_file)
@@ -219,7 +219,7 @@ def ask_output_file(str_prefix_output_file):
 
 
 def increment_until_new_file(str_file):
-    """Will increment given file path with number until file path does not exist yet."""
+    """Will increment given file path with number until file path does not exist yet"""
     i = 0
     str_final_file = str_file
     while os.path.exists(str_final_file):
@@ -230,12 +230,15 @@ def increment_until_new_file(str_file):
 
 
 def get_organizations_from_csv(str_path_csv_file):
-    """Returns defaultdict containing organizations with CIDRS from given CSV file"""
-    list_organizations = defaultdict(list)
+    """Returns OrderedDict containing organizations with CIDRS from given CSV file"""
+    list_organizations = OrderedDict()
     f = open(str_path_csv_file, 'r')
     for line in f:
         line = line.split(',')
-        list_organizations[line[0]].append(line[1])
+        if line[0] not in list_organizations:
+            list_organizations[line[0]] = [line[1]]
+        else:
+            list_organizations[line[0]].append(line[1])
     return list_organizations
 
 
