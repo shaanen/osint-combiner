@@ -33,6 +33,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--convert", help="Convert immediately without storing original file.", action="store_true")
 parser.add_argument("-y", "--yes", "--assume-yes", help="Automatic yes to prompts; assume \"yes\" as answer to all "
                                                         "prompts and run non-interactively.", action="store_true")
+parser.add_argument("-i", "--institutions", help="will add an institution field to every result based on given csv file "
+                                               "in config.ini", action="store_true")
 subparsers = parser.add_subparsers()
 cidr = subparsers.add_parser('cidr', help='One CIDR input')
 cidr.add_argument('inputcidr', help='The CIDR.')
@@ -56,6 +58,10 @@ args = parser.parse_args()
 choice = get_input_choice(args)
 check_outputfile(args.outputfile)
 should_convert = args.convert
+institutions = None
+if args.institutions:
+    institutions = get_institutions()
+
 t = TimeTracker()
 
 
@@ -167,7 +173,7 @@ def cidr_to_ipinfo(cidr_input, path_output_file, should_be_converted):
         for str_banner in result_list:
             banner = dict_clean_empty(json.loads(str_banner))
             if should_be_converted:
-                banner = ipinfo_to_es_convert(banner)
+                banner = ipinfo_to_es_convert(banner, institutions)
             output_file.write(json.dumps(banner) + '\n')
     if should_convert:
         print(str(len(result_list)) + ' results converted and written in ' + path_output_file)

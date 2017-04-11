@@ -10,6 +10,8 @@ os.chdir(sys.path[0])
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--convert", help="will also create a converted outputfile", action="store_true")
+parser.add_argument("-i", "--institutions", help="will add an institution field to every result based on given csv file "
+                                               "in config.ini", action="store_true")
 parser.add_argument("-y", "--yes", "--assume-yes", help="Automatic yes to prompts; assume \"yes\" as answer to all "
                                                         "prompts and run non-interactively.", action="store_true")
 subparsers = parser.add_subparsers()
@@ -39,7 +41,7 @@ t = TimeTracker()
 if choice is 'cidrfile':
     check_outputfile(args.outputfile)
     queries = ['net:' + s for s in parse_all_cidrs_from_file(args.inputfile, args.yes)]
-    to_file_shodan(queries, args.outputfile, should_convert)
+    to_file_shodan(queries, args.outputfile, should_convert, args.institutions)
 # query file input
 elif choice is 'queryfile':
     check_outputfile(args.outputfile)
@@ -48,10 +50,10 @@ elif choice is 'queryfile':
     print("\n".join(queries))
     if not args.yes:
         ask_continue()
-    to_file_shodan(queries, args.outputfile, should_convert)
+    to_file_shodan(queries, args.outputfile, should_convert, args.institutions)
 # CSV file input
 elif choice is 'csvfile':
-    organizations = get_organizations_from_csv(args.inputfile)
+    organizations = get_institutions_from_given_csv(args.inputfile)
     print(organizations.keys())
     print(str(len(organizations)) + ' organizations found.')
     if not args.yes:
@@ -62,5 +64,5 @@ elif choice is 'csvfile':
         queries = ['net:' + s for s in cidrs]
         print(name + ' [' + str(count) + '/' + str(len(organizations)) + ']...')
         str_path_output_file = 'outputfiles/shodan/shodan-' + name + '.json'
-        to_file_shodan(queries, str_path_output_file, should_convert)
+        to_file_shodan(queries, str_path_output_file, should_convert, args.institutions)
 t.print_statistics()

@@ -1,7 +1,8 @@
 from base import dict_add_source_prefix
+from base import add_institution_field
 
 
-def ipinfo_to_es_convert(input_dict):
+def ipinfo_to_es_convert(input_dict, institutions):
     """Returns dict ready to be used by the Elastic Stack."""
 
     # rename location elements
@@ -36,4 +37,9 @@ def ipinfo_to_es_convert(input_dict):
 
     # prefix non-nested fields with 'ipinfo'
     input_dict = dict_add_source_prefix(input_dict, 'ipinfo')
+
+    # If institutions are given, add institution field based on 'ip' field
+    if institutions is not None:
+        input_dict = add_institution_field(input_dict, institutions)
+
     return input_dict

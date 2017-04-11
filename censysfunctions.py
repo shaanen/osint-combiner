@@ -1,11 +1,13 @@
+from base import dict_add_source_prefix
+from base import add_institution_field
+from base import ConcatJSONDecoder
+from base import get_institutions
+from base import dict_clean_empty
+from base import convert_file
+from netaddr import IPNetwork
 import configparser
 import censys.export
 import censys.query
-from netaddr import IPNetwork
-from base import dict_add_source_prefix
-from base import dict_clean_empty
-from base import ConcatJSONDecoder
-from base import convert_file
 import requests
 import json
 import sys
@@ -126,11 +128,12 @@ def prepare_custom_query(query_part_after_where, latest_table=''):
     return 'select * from ipv4.' + str(latest_table) + ' where ' + str(query_part_after_where)
 
 
-def to_file(query, str_path_output_file, should_convert):
+def to_file(query, str_path_output_file, should_convert, should_add_institutions):
     """Makes Censys Export request with given query, converts results and writes to output file
     :param query: Strings which presents Censys SQL queries
     :param str_path_output_file: String which points to existing output file
     :param should_convert: Boolean if results should be converted
+    :param should_add_institutions: boolean if an institution field should be added when converting
     """
     c = new_api_obj('SQL_EXPORT')
     print("Executing query: " + query)
@@ -152,12 +155,15 @@ def to_file(query, str_path_output_file, should_convert):
 
         print(str(total_results) + ' total results written in ', str_path_output_file)
         if should_convert:
-            convert_file(str_path_output_file, 'censys')
+            institutions = None
+            if should_add_institutions:
+                institutions = get_institutions()
+            convert_file(str_path_output_file, 'censys', institutions)
     else:
         print('Censys job failed.' + '\n' + str(result))
 
 
-def censys_to_es_convert(input_dict):
+def censys_to_es_convert(input_dict, institutions):
     """Returns dict ready to be used by the Elastic Stack."""
     try:
         # convert ip_int to ipint
@@ -195,6 +201,11 @@ def censys_to_es_convert(input_dict):
 
     # prefix non-nested fields with 'censys'
     input_dict = dict_add_source_prefix(input_dict, 'censys')
+
+    # If institutions are given, add institution field based on 'ip' field
+    if institutions is not None:
+        input_dict = add_institution_field(input_dict, institutions)
+
     return input_dict
 
 

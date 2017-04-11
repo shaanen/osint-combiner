@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
+from base import create_output_directory
 from timetracker import TimeTracker
+from base import get_institutions
+from base import ask_continue
 from shodanfunctions import *
 from pathlib import Path
-from base import dict_clean_empty
-from base import create_output_directory
-from base import ask_continue
 import argparse
 import json
 import sys
@@ -16,14 +16,19 @@ parser = argparse.ArgumentParser()
 parser.add_argument("input", help="the input file or directory of files to be converted")
 parser.add_argument("-y", "--yes", "--assume-yes", help="Automatic yes to prompts; assume \"yes\" as answer to all "
                                                         "prompts and run non-interactively.", action="store_true")
+parser.add_argument("-i", "--institutions", help="will add an institution field to every result based on given csv file in config.ini", action="store_true")
 args = parser.parse_args()
 
 print('---Shodan converter---')
 t = TimeTracker()
 
+institutions = None
+if args.institutions:
+    institutions = get_institutions()
+
 # A file input
 if Path(args.input).is_file():
-    convert_file(args.input, 'shodan')
+    convert_file(args.input, 'shodan', institutions)
 
 # A directory input
 elif os.path.isdir(args.input):
@@ -46,7 +51,7 @@ elif os.path.isdir(args.input):
             for str_banner in open(input_directory + '/' + input_file, 'r'):
                 if str_banner != '\n':
                     banner = dict_clean_empty(json.loads(str_banner))
-                    shodan_to_es_convert(banner)
+                    shodan_to_es_convert(banner, institutions)
                     output_file.write(json.dumps(banner) + '\n')
     print('\nConverted files written in ' + output_directory)
 else:

@@ -13,6 +13,8 @@ os.chdir(sys.path[0])
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--convert", help="will also create a converted outputfile", action="store_true")
+parser.add_argument("-i", "--institutions", help="will add an institution field to every result based on given csv file "
+                                               "in config.ini", action="store_true")
 parser.add_argument("-y", "--yes", "--assume-yes", help="Automatic yes to prompts; assume \"yes\" as answer to all "
                                                         "prompts and run non-interactively.", action="store_true")
 subparsers = parser.add_subparsers()
@@ -118,16 +120,16 @@ if choice is 'queryfile':
     if not args.yes:
         ask_continue()
     for query in queries:
-        to_file(prepare_custom_query(query), args.outputfile, should_convert)
+        to_file(prepare_custom_query(query), args.outputfile, should_convert, args.institutions)
 # CIDR file input, single threaded
 elif choice is 'cidrfile':
     check_outputfile(args.outputfile)
     set_cidrs = parse_all_cidrs_from_file(str(args.inputfile), args.yes)
     query = prepare_cidrs_query(set_cidrs)
-    to_file(query, args.outputfile, should_convert)
+    to_file(query, args.outputfile, should_convert, args.institutions)
 # CSV file input, multi threaded
 elif choice is 'csvfile':
-    organizations = get_organizations_from_csv(args.inputfile)
+    organizations = get_institutions_from_given_csv(args.inputfile)
     print(organizations.keys())
     print(str(len(organizations)) + ' organizations found.')
     if not args.yes:

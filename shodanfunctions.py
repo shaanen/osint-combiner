@@ -1,4 +1,6 @@
 from base import dict_add_source_prefix
+from base import add_institution_field
+from base import get_institutions
 from base import dict_clean_empty
 from base import convert_file
 import configparser
@@ -16,7 +18,7 @@ def get_new_shodan_api_object():
     return shodan.Shodan(key)
 
 
-def shodan_to_es_convert(input_dict):
+def shodan_to_es_convert(input_dict, institutions):
     """Returns dict ready to be used by the Elastic Stack."""
     try:
         # set ip and ip_int
@@ -81,6 +83,11 @@ def shodan_to_es_convert(input_dict):
 
     # prefix non-nested fields with 'shodan'
     input_dict = dict_add_source_prefix(input_dict, 'shodan', str(input_dict['protocols']))
+
+    # If institutions are given, add institution field based on 'ip' field
+    if institutions is not None:
+        input_dict = add_institution_field(input_dict, institutions)
+
     return input_dict
 
 
@@ -106,11 +113,12 @@ def limit_nr_of_elements(input_dict):
     return input_dict
 
 
-def to_file_shodan(queries, path_output_file, should_convert):
+def to_file_shodan(queries, path_output_file, should_convert, should_add_institutions):
     """Makes a Shodan API call with each given query and writes results to output file
     :param queries: Collection of strings which present Shodan queries
     :param path_output_file: String which points to existing output file
     :param should_convert: Boolean if results should be converted
+    :param should_add_institutions: boolean if an institution field should be added when converting
     """
     api = get_new_shodan_api_object()
     nr_total_results = 0
@@ -136,7 +144,10 @@ def to_file_shodan(queries, path_output_file, should_convert):
 
     print(str(nr_total_results) + ' total results written in ' + path_output_file)
     if should_convert:
-        convert_file(path_output_file, 'shodan')
+        institutions = None
+        if should_add_institutions:
+            institutions = get_institutions()
+        convert_file(path_output_file, 'shodan', institutions)
 
 
 def get_input_choice():

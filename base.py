@@ -1,4 +1,4 @@
-from netaddr import IPNetwork, AddrFormatError
+from netaddr import IPNetwork, AddrFormatError, IPAddress
 from elasticsearch import Elasticsearch
 from elasticsearch import exceptions
 from collections import OrderedDict
@@ -31,6 +31,13 @@ def xpack_enabled():
     config = configparser.ConfigParser()
     config.read(os.path.dirname(os.path.realpath(__file__)) + "/config.ini")
     return config['elastic']['X-PACK_ENABLED']
+
+
+def get_institutions():
+    """Returns dict of institutions (specified in config.ini) with corresponding CIDR"""
+    config = configparser.ConfigParser()
+    config.read(os.path.dirname(os.path.realpath(__file__)) + "/config.ini")
+    return get_institutions_from_given_csv(config['other']['INSTITUTIONS_FILE'])
 
 
 def get_es_object():
@@ -191,6 +198,24 @@ def dict_clean_empty(d):
     return {k: v for k, v in ((k, dict_clean_empty(v)) for k, v in d.items()) if v or v == 0}
 
 
+def add_institution_field(input_dict, institutions):
+    """Adds institution field to given dict based on given dict containing institutions"""
+    ip = IPAddress(input_dict['ip'])
+    found = False
+    for name, cidrs in institutions.items():
+        if found:
+            break
+        else:
+            for cidr in cidrs:
+                if ip in cidr:
+                    input_dict['institution'] = name
+                    found = True
+                    break
+    if 'institution' not in input_dict:
+        input_dict['institution'] = 'OTHER'
+    return input_dict
+
+
 def ask_input_file(path_prefix=''):
     """Returns existing file from user input"""
     input_file = Path('')
@@ -229,7 +254,7 @@ def increment_until_new_file(str_file):
     return str_final_file
 
 
-def get_organizations_from_csv(str_path_csv_file):
+def get_institutions_from_given_csv(str_path_csv_file):
     """Returns OrderedDict containing organizations with CIDRS from given CSV file"""
     list_organizations = OrderedDict()
     f = open(str_path_csv_file, 'r')
@@ -343,7 +368,7 @@ def get_path_converted_output_file(str_path_input_file):
                                     + '-converted' + os.path.splitext(str(input_file))[1])
 
 
-def convert_file(str_path_input_file, source_type):
+def convert_file(str_path_input_file, source_type, institutions):
     """Converts given inputfile to outputfile"""
     from shodanfunctions import shodan_to_es_convert
     from censysfunctions import censys_to_es_convert
@@ -356,11 +381,11 @@ def convert_file(str_path_input_file, source_type):
                 try:
                     banner = dict_clean_empty(json.loads(str_banner))
                     if source_type is 'shodan':
-                        shodan_to_es_convert(banner)
+                        shodan_to_es_convert(banner, institutions)
                     elif source_type is 'censys':
-                        censys_to_es_convert(banner)
+                        censys_to_es_convert(banner, institutions)
                     elif source_type is 'ipinfo':
-                        ipinfo_to_es_convert(banner)
+                        ipinfo_to_es_convert(banner, institutions)
                     output_file.write(json.dumps(banner) + '\n')
                 except json.decoder.JSONDecodeError as e:
                     print(e.args)

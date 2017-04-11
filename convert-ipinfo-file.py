@@ -2,6 +2,7 @@
 from base import increment_until_new_file
 from base import create_output_directory
 from timetracker import TimeTracker
+from base import get_institutions
 from base import dict_clean_empty
 from base import ask_continue
 from ipinfofunctions import *
@@ -17,10 +18,16 @@ parser = argparse.ArgumentParser()
 parser.add_argument("input", help="the input file or directory of files to be converted")
 parser.add_argument("-y", "--yes", "--assume-yes", help="Automatic yes to prompts; assume \"yes\" as answer to all "
                                                         "prompts and run non-interactively.", action="store_true")
+parser.add_argument("-i", "--institutions", help="will add an institution field to every result based on given csv file "
+                                               "in config.ini", action="store_true")
 args = parser.parse_args()
 
 print('---IpInfo converter---')
 t = TimeTracker()
+
+institutions = None
+if args.institutions:
+    institutions = get_institutions()
 
 # A file input
 if Path(args.input).is_file():
@@ -31,7 +38,7 @@ if Path(args.input).is_file():
     with open(str_path_output_file, 'a') as output_file:
         for str_banner in input_file.open():
             banner = dict_clean_empty(json.loads(str_banner))
-            ipinfo_to_es_convert(banner)
+            ipinfo_to_es_convert(banner, institutions)
             output_file.write(json.dumps(banner) + '\n')
     print('Converted ' + str(input_file.as_posix()) + ' to ' + str_path_output_file)
 
@@ -56,7 +63,7 @@ elif os.path.isdir(args.input):
             for str_banner in open(input_directory + '/' + input_file, 'r'):
                 if str_banner != '\n':
                     banner = dict_clean_empty(json.loads(str_banner))
-                    ipinfo_to_es_convert(banner)
+                    ipinfo_to_es_convert(banner, institutions)
                     output_file.write(json.dumps(banner) + '\n')
     print('\nConverted files written in ' + output_directory)
 else:

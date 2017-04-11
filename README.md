@@ -37,6 +37,12 @@ X-PACK_USERNAME: *{(optional) X-PACK SHIELD username here}*
 
 X-PACK_PASSWORD: *{(optional) X-PACK SHIELD password here}*
 
+[other]
+
+INSTITUTIONS_FILE:  *{(optional) Path to CSV file containing institutions/organisations. Format is [name,CIDR] where
+every CIDR belonging to an institution should be a separate entry. The scripts will combine multiple entries to one
+institution with a lists of CIDRS}*
+
 ```
 
 + The Python3 scripts need the following modules (can be installed with easy_install3 or pip3): 
