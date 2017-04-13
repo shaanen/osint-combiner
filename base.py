@@ -30,7 +30,7 @@ def xpack_enabled():
     """Returns whether x-pack is enabled from config.ini"""
     config = configparser.ConfigParser()
     config.read(os.path.dirname(os.path.realpath(__file__)) + "/config.ini")
-    return config['elastic']['X-PACK_ENABLED']
+    return config.getboolean('elastic', 'X-PACK_ENABLED')
 
 
 def get_institutions():
@@ -42,6 +42,7 @@ def get_institutions():
 
 def get_es_object():
     """Returns Elasticsearch object"""
+    print(xpack_enabled())
     if xpack_enabled():
         credentials = get_xpack_credentials()
         return Elasticsearch([get_es_cluster_ip()], http_auth=(credentials[0], credentials[1]))
@@ -59,7 +60,6 @@ def es_get_all_ips(str_existing_index):
     for key in res['aggregations']['all_ip']['buckets']:
         list_ips.append(key['key'])
     print('Found ' + str(len(list_ips)) + ' IPs in Elasticsearch index ' + str_existing_index)
-    ask_continue()
     return list_ips
 
 
@@ -74,8 +74,7 @@ def es_get_ips_by_query(str_existing_index, query):
                         {"query_string": {"query": query, "analyze_wildcard": "true"}}})
     for key in res['aggregations']['ips_by_query']['buckets']:
         list_ips.append(key['key'])
-    print('Found ' + str(len(list_ips)) + ' IPs by query in Elasticsearch index ' + str_existing_index)
-    ask_continue()
+    print("Found " + str(len(list_ips)) + " IPs by query " + query + " in Elasticsearch index " + str_existing_index)
     return list_ips
 
 
@@ -89,7 +88,6 @@ def es_get_all(str_existing_index):
     for key in res['hits']['hits']:
         documents.append(key)
     print('Found ' + str(len(documents)) + ' IPs in Elasticsearch index ' + str_existing_index)
-    ask_continue()
     return documents
 
 
