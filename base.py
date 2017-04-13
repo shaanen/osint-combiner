@@ -63,16 +63,15 @@ def es_get_all_ips(str_existing_index):
     return list_ips
 
 
-def es_get_ips_by_query(str_existing_index):
-    """Returns list of ips from query stored in given Elasticsearch index
-    The query body in this function needs to be edited hardcoded.
+def es_get_ips_by_query(str_existing_index, query):
+    """Returns list of ips from given query in given Elasticsearch index
     """
     list_ips = []
     es = get_es_object()
     count = es.count(index=str_existing_index)['count']
     res = es.search(index=str_existing_index,
                     body={"size": 0, "aggs": {"ips_by_query": {"terms": {"field": "ip", "size": count}}}, "query":
-                        {"query_string": {"query":"\"cisco-IOS\" OR \" Cisco Systems\"", "analyze_wildcard": "true"}}})
+                        {"query_string": {"query": query, "analyze_wildcard": "true"}}})
     for key in res['aggregations']['ips_by_query']['buckets']:
         list_ips.append(key['key'])
     print('Found ' + str(len(list_ips)) + ' IPs by query in Elasticsearch index ' + str_existing_index)
