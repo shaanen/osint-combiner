@@ -42,7 +42,6 @@ def get_institutions():
 
 def get_es_object():
     """Returns Elasticsearch object"""
-    print(xpack_enabled())
     if xpack_enabled():
         credentials = get_xpack_credentials()
         return Elasticsearch([get_es_cluster_ip()], http_auth=(credentials[0], credentials[1]))
@@ -74,8 +73,23 @@ def es_get_ips_by_query(str_existing_index, query):
                         {"query_string": {"query": query, "analyze_wildcard": "true"}}})
     for key in res['aggregations']['ips_by_query']['buckets']:
         list_ips.append(key['key'])
-    print("Found " + str(len(list_ips)) + " IPs by query " + query + " in Elasticsearch index " + str_existing_index)
+    print("Found " + str(len(list_ips)) + " IPs by query \"" + query + "\" in Elasticsearch index \""
+          + str_existing_index + "\"")
     return list_ips
+
+
+def es_append_cve_by_query(es_index, q, cve):
+    """Appends cve to all IPs in es_index by query"""
+    es = get_es_object()
+    es.update_by_query(index=es_index,
+                       body={"script": {"inline": "if (ctx._source.cves == null) {ctx._source.cves = params.cvesparam }"
+                                                  "else {if(!ctx._source.cves.cves.contains(params.cvesparam.cves) && "
+                                                  "! ctx._source.cves.cves.equals(params.cvesparam.cves)){ "
+                                                  "ctx._source.cves.cves.add(params.cvesparam.cves); "
+                                                  "ctx._source.cves.links.add(params.cvesparam.links)}}", "lang":
+                                        "painless", "params": {"cvesparam":
+                                {"links":["https://cve.mitre.org/cgi-bin/cvename.cgi?name=" + cve], "cves": [cve]}}}},
+                       q=q)
 
 
 def es_get_all(str_existing_index):
