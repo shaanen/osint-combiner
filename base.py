@@ -260,8 +260,13 @@ def increment_until_new_file(str_file):
     str_final_file = str_file
     while os.path.exists(str_final_file):
         i += 1
-        str_final_file = os.path.dirname(str_file) + '/' + os.path.splitext(os.path.basename(str(str_file)))[
-            0] + str(i) + os.path.splitext(os.path.basename(str(str_file)))[1]
+        print(os.path.dirname(str_file))
+        if os.path.dirname(str_file) is "":
+            str_final_file = os.path.splitext(os.path.basename(str(str_file)))[
+                0] + str(i) + os.path.splitext(os.path.basename(str(str_file)))[1]
+        else:
+            str_final_file = os.path.dirname(str_file) + '/' + os.path.splitext(os.path.basename(str(str_file)))[
+                0] + str(i) + os.path.splitext(os.path.basename(str(str_file)))[1]
     return str_final_file
 
 

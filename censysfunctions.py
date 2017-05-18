@@ -1,14 +1,14 @@
+from base import increment_until_new_file
 from base import dict_add_source_prefix
 from base import add_institution_field
-from base import ConcatJSONDecoder
 from base import get_institutions
 from base import dict_clean_empty
 from base import convert_file
 from netaddr import IPNetwork
-import configparser
+import urllib.request
 import censys.export
+import configparser
 import censys.query
-import requests
 import json
 import sys
 import re
@@ -143,16 +143,22 @@ def to_file(query, str_path_output_file, should_convert, should_add_institutions
     result = c.check_job_loop(job_id)
 
     if result['status'] == 'success':
+        temp_file = increment_until_new_file("temp")
+        nr_of_files_counter = 0
         total_results = 0
-        for path in result['download_paths']:
-            response = requests.get(path)
-            list_of_json = json.loads(response.content.decode('utf-8'), cls=ConcatJSONDecoder)
+        paths = result['download_paths']
+        for path in paths:
+            nr_of_files_counter += 1
+            print("Retrieving file " + str(nr_of_files_counter) + " of " + str(len(paths)) + "...")
+            urllib.request.urlretrieve(path, temp_file)
+            print("Processing results...")
             with open(str_path_output_file, 'a') as output_file:
-                for result in list_of_json:
-                    result = dict_clean_empty(result)
+                for result in open(temp_file):
+                    result_json = dict_clean_empty(json.loads(result))
                     output_file.write(json.dumps(result) + '\n')
-            total_results += len(list_of_json)
-
+                    total_results += 1
+            os.remove(temp_file)
+        print("Done.")
         print(str(total_results) + ' total results written in ', str_path_output_file)
         if should_convert:
             institutions = None
