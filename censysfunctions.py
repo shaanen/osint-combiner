@@ -155,7 +155,7 @@ def to_file(query, str_path_output_file, should_convert, should_add_institutions
             with open(str_path_output_file, 'a') as output_file:
                 for result in open(temp_file):
                     result_json = dict_clean_empty(json.loads(result))
-                    output_file.write(json.dumps(result) + '\n')
+                    output_file.write(json.dumps(result_json) + '\n')
                     total_results += 1
             os.remove(temp_file)
         print("Done.")
