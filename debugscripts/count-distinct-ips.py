@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from timetracker import TimeTracker
 from pathlib import Path
 import argparse
 import json
-import sys
-import os
 
 parser = argparse.ArgumentParser()
 parser.add_argument("input", help="the input file or directory of files to be converted")
