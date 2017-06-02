@@ -16,7 +16,7 @@ Currently supported OSINT sources:
 
 + A [Shodan.io](https://www.shodan.io/ "Shodan's Homepage") key for API access and scan credits
 + A [Censys.io](https://censys.io/ "Censys' Homepage") ID and KEY with [SQL and Export privileges](https://censys.io/contact "Censys' Contact page") 
-+ Project needs a text file named "config.ini" with the following content:
++ Fill the file "config.ini" with the required values:
 
 ```
 [osint_sources]
@@ -51,13 +51,5 @@ institution with a lists of CIDRS}*
   + Elasticsearch
   + Netaddr
   
-## How to use
-You can run the following scripts:
- + tofile-\*.py files take arguments and can be runned automatically, for example with a CRON job. Run with the '-h' flag for more info;
- + tofile-\*-manually.py files will ask for user input interactively;
- + convert-\*.py files can convert the resulting files from tofile-\*.py to Elasticsearch compatible files, if not already converted with the '-c' flag from tofile-\*.py;
- + Scripts in debugscripts/ can be used for debugging purposes.
-
-The \*.conf files are Logstash configuration files which you need to edit so the config will point to the right files and Elasticsearch index.
-
-Elasticsearch needs a specific mapping to import the data from the scripts. Use the mapping in the [Wiki](https://github.com/sjorsng/vulnerabilityfinder/wiki#required-elasticsearch-mapping-for-indexes "The Github Wiki of this project"). 
+## How to build
+See the wiki page ["Building osint-combiner"](https://github.com/sjorsng/osint-combiner/wiki/Building-osint-combiner) for a visualization and steps to build.
