@@ -21,4 +21,4 @@ Currently supported OSINT sources:
 + A [Censys.io](https://censys.io/ "Censys' Homepage") ID and KEY with [SQL and Export privileges](https://censys.io/contact "Censys' Contact page") 
   
 ## How to build
-See the wiki page ["Building osint-combiner"](https://github.com/sjorsng/osint-combiner/wiki/Building-osint-combiner) for a visualization and steps to build the environment.
+See the wiki ["homepage"](https://github.com/sjorsng/osint-combiner/wiki) for a visualization and steps to build the environment.
