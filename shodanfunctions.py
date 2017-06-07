@@ -3,6 +3,7 @@ from base import add_institution_field
 from base import get_institutions
 from base import dict_clean_empty
 from base import convert_file
+from base import send_exception_mail_if_enabled
 import configparser
 import shodan
 import json
@@ -32,6 +33,7 @@ def shodan_to_es_convert(input_dict, institutions):
             input_dict['ip'] = input_dict['ip_str']
             del input_dict['ip_str']
         except KeyError:
+            send_exception_mail_if_enabled()
             print(input_dict)
             print('Missing required \'ip\' field in the element above. Exiting now...')
             sys.exit(1)
@@ -46,12 +48,6 @@ def shodan_to_es_convert(input_dict, institutions):
         input_dict['ssl']['dhparams']['generator'] = str(input_dict['ssl']['dhparams']['generator'])
     except (KeyError, TypeError):
         pass
-    # if present, convert opts.bitcoin.handshake.nonce' to string
-    # try:
-    #     input_dict['opts']['bitcoin']['handshake'][0]['nonce'] = \
-    #         str(input_dict['opts']['bitcoin']['handshake'][0]['nonce'])
-    # except (KeyError, TypeError):
-    #     pass
 
     try:
         # rename_shodan.modules to protocols (used as prefix per banner for combining multiple banners into 1 IP)

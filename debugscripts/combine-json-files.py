@@ -12,7 +12,6 @@ parser.add_argument("input", type=argparse.FileType('r'), nargs='+', help="The i
 parser.add_argument("-o", "--output", default="output.json", help="the file where the results will be stored "
                                                                   "(default: output.json)")
 args = parser.parse_args()
-path_input_file = args.input
 input_files = args.input
 output_file = args.output
 if len(input_files) < 2:

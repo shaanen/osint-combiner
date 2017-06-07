@@ -40,6 +40,13 @@ def get_institutions():
     return get_institutions_from_given_csv(config['other']['INSTITUTIONS_FILE'])
 
 
+def email_notification_enabled():
+    """Returns whether email notification for errors is enabled from config.ini """
+    config = configparser.ConfigParser()
+    config.read(os.path.dirname(os.path.realpath(__file__)) + "/config.ini")
+    return config.getboolean('email', 'X-EMAIL_ENABLED')
+
+
 def get_es_object():
     """Returns Elasticsearch object"""
     if xpack_enabled():
@@ -115,8 +122,8 @@ def exists_es_index(str_valid_index):
             return es_indices.exists(index=str_valid_index)
         except exceptions.ConnectionTimeout:
             connection_attempts += 1
-    print('Elasticsearch connection timeout, exiting now...')
-    sys.exit(1)
+    send_exception_mail_if_enabled()
+    sys.exit('Elasticsearch connection timeout, exiting now...')
 
 
 def get_cidr_from_user_input():
@@ -260,7 +267,6 @@ def increment_until_new_file(str_file):
     str_final_file = str_file
     while os.path.exists(str_final_file):
         i += 1
-        print(os.path.dirname(str_file))
         if os.path.dirname(str_file) is "":
             str_final_file = os.path.splitext(os.path.basename(str(str_file)))[
                 0] + str(i) + os.path.splitext(os.path.basename(str(str_file)))[1]
@@ -373,6 +379,7 @@ def check_outputfile(str_file_path):
     try:
         open(str_file_path, "a")
     except FileNotFoundError:
+        send_exception_mail_if_enabled()
         msg = 'Cannot create outputfile. Do all directories in outputfile path exist?'
         raise argparse.ArgumentTypeError(msg)
 
@@ -405,7 +412,15 @@ def convert_file(str_path_input_file, source_type, institutions):
                     output_file.write(json.dumps(banner) + '\n')
                 except json.decoder.JSONDecodeError as e:
                     print(e.args)
-                    print('Malformed json: ' + str_banner)
+                    send_exception_mail_if_enabled()
+                    sys.exit("Exiting because of malformed json: " + str_banner)
     print('Converted ' + str_path_input_file + ' to ' + str_path_output_file)
+
+
+def send_exception_mail_if_enabled():
+    """If enabled in config.ini, calls send_exc_mail() in exceptionmailer.py which results in an email sent."""
+    if email_notification_enabled():
+        from exceptionmailer import send_exc_mail
+        send_exc_mail()
 
 
