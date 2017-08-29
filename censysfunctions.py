@@ -1,4 +1,3 @@
-from base import send_exception_mail_if_enabled
 from base import increment_until_new_file
 from base import dict_add_source_prefix
 from base import add_institution_field
@@ -177,7 +176,6 @@ def censys_to_es_convert(input_dict, institutions):
         input_dict['ip_int'] = input_dict['ipint']
         del input_dict['ipint']
     except KeyError:
-        send_exception_mail_if_enabled()
         print(input_dict)
         print('Missing required IP field here. Exiting now...')
         sys.exit(1)

@@ -40,13 +40,6 @@ def get_institutions():
     return get_institutions_from_given_csv(config['other']['INSTITUTIONS_FILE'])
 
 
-def email_notification_enabled():
-    """Returns whether email notification for errors is enabled from config.ini """
-    config = configparser.ConfigParser()
-    config.read(os.path.dirname(os.path.realpath(__file__)) + "/config.ini")
-    return config.getboolean('email', 'X-EMAIL_ENABLED')
-
-
 def get_es_object():
     """Returns Elasticsearch object"""
     if xpack_enabled():
@@ -122,19 +115,7 @@ def exists_es_index(str_valid_index):
             return es_indices.exists(index=str_valid_index)
         except exceptions.ConnectionTimeout:
             connection_attempts += 1
-    send_exception_mail_if_enabled()
     sys.exit('Elasticsearch connection timeout, exiting now...')
-
-
-def get_cidr_from_user_input():
-    """Parses one CIDR from user input and returns IPNetwork"""
-    ip_or_cidr = '0'
-    while not isinstance(ip_or_cidr, IPNetwork):
-        try:
-            ip_or_cidr = IPNetwork(input('IP/CIDR: '))
-        except AddrFormatError:
-            print('Not a valid IP/CIDR.')
-    return ip_or_cidr
 
 
 def parse_all_cidrs_from_file(file_path, assume_yes):
@@ -232,24 +213,6 @@ def add_institution_field(input_dict, institutions):
     if 'institution' not in input_dict:
         input_dict['institution'] = 'OTHER'
     return input_dict
-
-
-def ask_input_file(path_prefix=''):
-    """Returns existing file from user input"""
-    input_file = Path('')
-    input_file_path = ''
-    while not input_file.is_file():
-        input_file_path = input('Input file:' + path_prefix)
-        input_file = Path(path_prefix + input_file_path)
-    return input_file
-
-
-def ask_input_directory():
-    """Returns existing directory from user input"""
-    input_directory = ''
-    while not os.path.isdir(input_directory):
-        input_directory = input('Input directory:')
-    return input_directory
 
 
 def ask_output_file(str_prefix_output_file):
@@ -379,7 +342,6 @@ def check_outputfile(str_file_path):
     try:
         open(str_file_path, "a")
     except FileNotFoundError:
-        send_exception_mail_if_enabled()
         msg = 'Cannot create outputfile. Do all directories in outputfile path exist?'
         raise argparse.ArgumentTypeError(msg)
 
@@ -395,7 +357,6 @@ def convert_file(str_path_input_file, source_type, institutions):
     """Converts given inputfile to outputfile"""
     from shodanfunctions import shodan_to_es_convert
     from censysfunctions import censys_to_es_convert
-    from ipinfofunctions import ipinfo_to_es_convert
     str_path_output_file = get_path_converted_output_file(str_path_input_file)
     with open(str_path_output_file, 'a', encoding='utf-8') as output_file:
         input_file = Path(str_path_input_file)
@@ -407,20 +368,8 @@ def convert_file(str_path_input_file, source_type, institutions):
                         shodan_to_es_convert(banner, institutions)
                     elif source_type is 'censys':
                         censys_to_es_convert(banner, institutions)
-                    elif source_type is 'ipinfo':
-                        ipinfo_to_es_convert(banner, institutions)
                     output_file.write(json.dumps(banner) + '\n')
                 except json.decoder.JSONDecodeError as e:
                     print(e.args)
-                    send_exception_mail_if_enabled()
                     sys.exit("Exiting because of malformed json: " + str_banner)
     print('Converted ' + str_path_input_file + ' to ' + str_path_output_file)
-
-
-def send_exception_mail_if_enabled():
-    """If enabled in config.ini, calls send_exc_mail() in exceptionmailer.py which results in an email sent."""
-    if email_notification_enabled():
-        from exceptionmailer import send_exc_mail
-        send_exc_mail()
-
-

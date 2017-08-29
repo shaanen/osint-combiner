@@ -9,7 +9,6 @@ This project contains:
 Currently supported OSINT sources:
 + [Shodan.io](https://www.shodan.io/ "Shodan's Homepage")
 + [Censys.io](https://censys.io/ "Censys' Homepage")
-+ [IpInfo by DutchSec](http://dutchsec.nl/ "DutchSec's Homepage")
 
 \- [Zoomeye](http://dutchsec.nl/ "Zoomeye's Homepage") is not yet supported because of limitations on their API. They don't respond on e-mails.
 
