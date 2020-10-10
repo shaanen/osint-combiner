@@ -1,4 +1,4 @@
-# OSINT Combiner
+# ⛔️ DEPRICATED/NOT MAINTAINED - OSINT Combiner
 Combining OSINT sources in Elastic Stack
 
 This project contains: 
